@@ -36,3 +36,21 @@
     transform: rotate(360deg);
   }
 }
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #0a84ff;
+  color: white;
+  padding: 8px 12px;
+  z-index: 1000;
+  text-decoration: none;
+}
+.skip-link:focus-visible {
+  top: 8px;
+}
+:focus-visible {
+  outline: 3px solid #0a84ff;
+  outline-offset: 3px;
+}
