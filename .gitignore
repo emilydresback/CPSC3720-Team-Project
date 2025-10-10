@@ -1,1 +1,10 @@
 ﻿backend/node_modules
+backend/tests
+# Local backend README (environment-specific run instructions/logs)
+backend/README.md
+
+# Ignore shared DB binaries (don't commit local SQLite DB files)
+backend/shared-db/database.sqlite
+backend/shared-db/database.sqlite-wal
+backend/shared-db/database.sqlite-shm
+

@@ -6,5 +6,6 @@ CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     date TEXT NOT NULL,
-    total_tickets INTEGER NOT NULL CHECK(total_tickets >= 0)
+    total_tickets INTEGER NOT NULL CHECK(total_tickets >= 0),
+    tickets_available INTEGER NOT NULL DEFAULT 0
 );
