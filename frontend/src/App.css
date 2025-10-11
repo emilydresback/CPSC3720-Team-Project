@@ -1,34 +1,368 @@
-.App {
+/* ============================================
+   TIGERTIX - SUNRISE AT DEATH VALLEY THEME
+   Bold yet soft - Game day vibes with elegance
+   ============================================ */
+
+:root {
+  /* Sunrise at Death Valley Color Palette */
+  --sunrise-orange: #FFA07A;
+  --morning-purple: #DDA0DD;
+  --dawn-white: #FFF5EE;
+  --coral-pink: #FFB6A3;
+  --storm-gray: #555555;
+  --text-dark: #333333;
+  
+  /* Shadow colors for depth */
+  --shadow-orange: rgba(255, 160, 122, 0.4);
+  --shadow-purple: rgba(221, 160, 221, 0.4);
+  --shadow-dark: rgba(85, 85, 85, 0.2);
+}
+
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: var(--storm-gray);
+  background: linear-gradient(135deg, var(--dawn-white) 0%, #FFF8F5 100%);
+  min-height: 100vh;
+}
+
+/* ============================================
+   SKIP LINK
+   ============================================ */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--morning-purple);
+  color: white;
+  padding: 8px 12px;
+  z-index: 1000;
+  text-decoration: none;
+  border-radius: 0 0 8px 0;
+  font-weight: 600;
+  box-shadow: 0 4px 12px var(--shadow-purple);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 8px;
+  outline: 3px solid var(--sunrise-orange);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--morning-purple);
+  outline-offset: 3px;
+}
+
+/* ============================================
+   HEADER - Orange Only
+   ============================================ */
+header {
+  background: linear-gradient(135deg, var(--sunrise-orange) 0%, var(--coral-pink) 100%);
+  color: white;
+  padding: 3rem 2rem;
   text-align: center;
+  box-shadow: 0 6px 24px var(--shadow-orange);
+  margin-bottom: 2rem;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+header h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+  letter-spacing: 1px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+header p {
+  font-size: 1.2rem;
+  font-weight: 400;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+main {
+  max-width: 1200px;
+  margin: 0 auto 3rem;
+  padding: 0 1.5rem;
+}
+
+main:focus {
+  outline: none;
+}
+
+/* ============================================
+   MESSAGES - Purple themed
+   ============================================ */
+.message {
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  position: relative;
+  padding-left: 3.5rem;
+}
+
+.message::before {
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.message.success {
+  background: linear-gradient(135deg, #E8D4F8 0%, #D8BBE8 100%);
+  border: 2px solid var(--morning-purple);
+  color: #4A2B5C;
+  box-shadow: 0 4px 16px var(--shadow-purple);
+}
+
+.message.success::before {
+  content: '✓';
+  color: var(--morning-purple);
+}
+
+.message.error {
+  background: linear-gradient(135deg, #FFE5E5 0%, #FFD0D0 100%);
+  border: 2px solid #DC3545;
+  color: #721C24;
+  box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+}
+
+.message.error::before {
+  content: '✕';
+  color: #DC3545;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* ============================================
+   EVENTS SECTION - Purple accent
+   ============================================ */
+section h2 {
+  font-size: 2.2rem;
+  color: var(--text-dark);
+  margin-bottom: 2rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 4px solid var(--morning-purple);
+  position: relative;
+  text-shadow: none;
+  font-weight: 700;
+}
+
+section h2::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100px;
+  height: 4px;
+  background: var(--sunrise-orange);
+  box-shadow: 0 2px 8px var(--shadow-orange);
+}
+
+/* ============================================
+   EVENTS LIST - Purple borders
+   ============================================ */
+.events-list {
+  list-style: none;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.event-item {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px var(--shadow-purple);
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 2rem;
+  transition: all 0.3s ease;
+  border: 2px solid var(--morning-purple);
+  border-left: 6px solid var(--morning-purple);
+}
+
+.event-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px var(--shadow-purple);
+  border-color: var(--sunrise-orange);
+  border-left-color: var(--sunrise-orange);
+}
+
+.event-item:focus-within {
+  border-color: var(--morning-purple);
+  box-shadow: 0 8px 32px var(--shadow-purple);
+}
+
+/* ============================================
+   EVENT INFO - Purple accents
+   ============================================ */
+.event-info {
+  flex: 1;
+  text-align: left;
+}
+
+.event-info h3 {
+  font-size: 1.6rem;
+  color: var(--morning-purple);
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+.event-date {
+  color: var(--storm-gray);
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  position: relative;
+  padding-left: 1.8rem;
+}
+
+.event-date::before {
+  content: '▣';
+  position: absolute;
+  left: 0;
+  font-size: 1.1rem;
+  color: var(--morning-purple);
+}
+
+.ticket-count {
+  color: var(--text-dark);
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+  position: relative;
+  padding-left: 1.8rem;
+}
+
+.ticket-count::before {
+  content: '▪';
+  position: absolute;
+  left: 0;
+  font-size: 1.3rem;
+  color: var(--morning-purple);
+}
+
+.ticket-count strong {
+  color: var(--morning-purple);
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+/* ============================================
+   BUY BUTTON - Orange gradient
+   ============================================ */
+.buy-button {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--sunrise-orange) 0%, var(--coral-pink) 100%);
   color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+  
+  box-shadow: 
+    0 4px 12px var(--shadow-orange),
+    0 2px 4px rgba(0,0,0,0.15);
+  
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 
-.App-link {
-  color: #61dafb;
+.buy-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--coral-pink) 0%, var(--sunrise-orange) 100%);
+  transform: scale(1.05);
+  
+  box-shadow: 
+    0 8px 24px var(--shadow-orange),
+    0 4px 8px rgba(0,0,0,0.2);
 }
 
-@keyframes App-logo-spin {
+.buy-button:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 
+    0 2px 8px var(--shadow-orange),
+    0 1px 2px rgba(0,0,0,0.1);
+}
+
+.buy-button:disabled {
+  background: linear-gradient(135deg, #D0D0D0 0%, #B0B0B0 100%);
+  cursor: not-allowed;
+  opacity: 0.8;
+  color: #666666;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.buy-button:focus,
+.buy-button:focus-visible {
+  outline: 3px solid var(--morning-purple);
+  outline-offset: 3px;
+}
+
+/* ============================================
+   LOADING STATE - Purple themed
+   ============================================ */
+.loading-container {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px var(--shadow-purple);
+  border: 2px solid var(--morning-purple);
+  margin: 3rem auto;
+  max-width: 600px;
+}
+
+.loading-container p {
+  font-size: 1.3rem;
+  color: var(--storm-gray);
+  font-weight: 600;
+}
+
+.loading-container::before {
+  content: '◐';
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 1rem;
+  color: var(--morning-purple);
+  animation: spin 2s linear infinite;
+  filter: drop-shadow(0 4px 8px var(--shadow-purple));
+}
+
+@keyframes spin {
   from {
     transform: rotate(0deg);
   }
@@ -37,20 +371,200 @@
   }
 }
 
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: #0a84ff;
+/* ============================================
+   ERROR STATE - Purple themed
+   ============================================ */
+.error-container {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px var(--shadow-purple);
+  border: 2px solid var(--morning-purple);
+  margin: 3rem auto;
+  max-width: 600px;
+  position: relative;
+}
+
+.error-container::before {
+  content: '⚠';
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 1rem;
+  color: #DC3545;
+  filter: drop-shadow(0 2px 4px rgba(220, 53, 69, 0.3));
+}
+
+.error-container h2 {
+  color: #C62828;
+  margin-bottom: 1rem;
+  border: none;
+  font-size: 2rem;
+  text-shadow: none;
+  font-weight: 700;
+}
+
+.error-container p {
+  color: var(--storm-gray);
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.error-container button {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--sunrise-orange) 0%, var(--coral-pink) 100%);
   color: white;
-  padding: 8px 12px;
-  z-index: 1000;
-  text-decoration: none;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px var(--shadow-orange);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
-.skip-link:focus-visible {
-  top: 8px;
+
+.error-container button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px var(--shadow-orange);
 }
-:focus-visible {
-  outline: 3px solid #0a84ff;
-  outline-offset: 3px;
+
+/* ============================================
+   NO EVENTS STATE - Purple themed
+   ============================================ */
+.no-events {
+  text-align: center;
+  padding: 3rem;
+  color: var(--storm-gray);
+  font-size: 1.2rem;
+  font-weight: 500;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px var(--shadow-purple);
+  border: 2px solid var(--morning-purple);
+  position: relative;
+  padding-top: 5rem;
+}
+
+.no-events::before {
+  content: '◯';
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 3rem;
+  color: var(--morning-purple);
+  opacity: 0.5;
+}
+
+/* ============================================
+   FOOTER - Purple and Orange gradient
+   ============================================ */
+footer {
+  background: linear-gradient(135deg, var(--morning-purple) 0%, var(--sunrise-orange) 50%, var(--coral-pink) 100%);
+  color: white;
+  text-align: center;
+  padding: 2rem;
+  margin-top: 4rem;
+  box-shadow: 0 -4px 20px var(--shadow-purple);
+}
+
+footer p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+
+footer p::before {
+  content: '© ';
+  font-weight: 700;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+  header h1 {
+    font-size: 2.2rem;
+  }
+
+  header p {
+    font-size: 1rem;
+  }
+
+  section h2 {
+    font-size: 1.8rem;
+  }
+
+  .event-item {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+  }
+
+  .buy-button {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+@media (prefers-contrast: high) {
+  body {
+    color: #000000;
+  }
+  
+  .event-item {
+    border: 3px solid var(--morning-purple);
+  }
+  
+  .buy-button {
+    background: var(--sunrise-orange);
+  }
+  
+  .buy-button:focus {
+    outline: 4px solid #000000;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .event-item:hover {
+    transform: none;
+  }
+}
+
+/* ============================================
+   FOOTER - Pure Purple
+   ============================================ */
+footer {
+  background: linear-gradient(135deg, var(--morning-purple) 0%, #D396D3 100%);
+  color: rgb(255, 255, 255);
+  text-align: center;
+  padding: 2rem;
+  margin-top: 4rem;
+  box-shadow: 0 -4px 20px var(--shadow-purple);
+}
+
+footer p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+
+footer p::before {
+  content: '© ';
+  font-weight: 700;
 }
