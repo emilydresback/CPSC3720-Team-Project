@@ -1,4 +1,4 @@
-// ================================================
+
 // clientModel.js
 // ================================================
 // This file handles all database operations for the client microservice.
@@ -6,8 +6,8 @@
 // (including ticket counts).
 //
 // Task 5 focuses on database synchronization & concurrency:
-// → Preventing race conditions
-// → Ensuring ticket counts remain accurate under load
+// - Preventing race conditions
+// - Ensuring ticket counts remain accurate under load
 //
 // This implementation uses TRANSACTIONS to make sure that either:
 // - The entire purchase succeeds (and tickets are deducted properly)
@@ -35,9 +35,12 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
-// Ensure DB schema is compatible: if `tickets_available` column is missing, add it
-// and initialize it from `total_tickets`. This avoids requiring a separate script.
-db.serialize(() => {
+// ------------------------------------------------
+// Database migration: ensure tickets_available column exists
+// If missing, add and initialize it from total_tickets.
+// This prevents requiring a separate migration script.
+// ------------------------------------------------
+  db.serialize(() => {
   db.all("PRAGMA table_info(events)", (err, cols) => {
     if (err) {
       console.error('Failed to read table info:', err.message);
@@ -63,7 +66,9 @@ db.serialize(() => {
   });
 });
 
-// Set PRAGMA options to help with concurrent writes
+// ------------------------------------------------
+// Configure PRAGMA settings for concurrency handling
+// ------------------------------------------------
 db.serialize(() => {
   // Use WAL journal mode for better concurrency
   db.run("PRAGMA journal_mode = WAL");
@@ -71,15 +76,18 @@ db.serialize(() => {
   db.run("PRAGMA busy_timeout = 5000");
 });
 
-// ------------------------------------------------
-// FUNCTION: getAllEvents
-// ------------------------------------------------
-// Purpose: Fetch all available events from the "events" table.
-// Input: callback(err, rows)
-// Output: an array of event objects (id, name, tickets, etc.)
-//
-// This function does NOT modify the database, it’s a simple read operation.
-// ------------------------------------------------
+
+/*
+ * Retrieves all events from the database.
+ *
+ * @function getAllEvents
+ * @description Fetch all events from the "events" table and normalize ticket data.
+ * @param {Function} callback - Function to execute once the query finishes.
+ *   Receives parameters (err, rows), where:
+ *   - err {Error|null}: Error object if a query failure occurs
+ *   - rows {Array<Object>}: Array of event objects
+ * @returns {void}
+ */
 function getAllEvents(callback) {
    // Select all events from DB
   const query = 'SELECT * FROM events';
@@ -100,26 +108,29 @@ function getAllEvents(callback) {
   });
 }
 
-// ------------------------------------------------
-// FUNCTION: purchaseTickets
-// ------------------------------------------------
-// Purpose:
-// Safely handle ticket purchases by:
-//   1. Checking ticket availability
-//   2. Preventing overselling
-//   3. Updating the database atomically using a TRANSACTION
-//
-// Logic flow:
-//   BEGIN TRANSACTION
-//   → SELECT event
-//   → Check if enough tickets exist
-//   → UPDATE ticket count
-//   → COMMIT (save changes)
-//   → If any step fails, ROLLBACK (undo changes)
-//
-// The db.serialize() ensures operations are queued and executed sequentially,
-// which avoids concurrent write conflicts within SQLite.
-// ------------------------------------------------
+/*
+ * Processes a ticket purchase for a given event.
+ *
+ * @function purchaseTickets
+ * @description Safely decrements available tickets using an atomic SQL update.
+ * Prevents overselling by ensuring updates occur only when enough tickets remain.
+ * Uses SQLite’s implicit transaction protection for atomicity.
+ *
+ * @param {number} eventId - The ID of the event to purchase tickets for
+ * @param {number} quantity - The number of tickets to purchase
+ * @param {Function} callback - Function to execute when the transaction completes.
+ *   Receives parameters (err, updatedEvent), where:
+ *   - err {Error|null}: Error if not enough tickets or DB failure
+ *   - updatedEvent {Object|null}: The updated event data after purchase
+ * @returns {void}
+ *
+ * @example
+ * purchaseTickets(2, 3, (err, updatedEvent) => {
+ *   if (err) console.error(err.message);
+ *   else console.log('Purchase successful:', updatedEvent);
+ * });
+ */
+
 function purchaseTickets(eventId, quantity, callback) {
   // Use a single atomic UPDATE to decrement tickets only if enough are available.
   // This avoids explicit BEGIN/COMMIT and prevents nested transaction errors.

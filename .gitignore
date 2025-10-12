@@ -8,3 +8,8 @@ backend/shared-db/database.sqlite
 backend/shared-db/database.sqlite-wal
 backend/shared-db/database.sqlite-shm
 
+
+# General ignores
+.DS_Store
+node_modules
+

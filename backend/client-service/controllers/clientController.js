@@ -3,26 +3,40 @@
 
 const clientModel = require('../models/clientModel');
 
-/**
- * GET /api/events
- * Returns a list of all events
+/*
+ * Handles GET requests to /api/events
+ * @function getEvents
+ * @description Retrieves all available events from the database and returns them as JSON.
+ * @param {Object} req - The Express request object
+ * @param {Object} res - The Express response object
+ * @returns {void} Sends JSON response with event data or error message
  */
+
 function getEvents(req, res) {
   clientModel.getAllEvents((err, events) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to fetch events' });
     }
-    res.json(events); // send events as JSON
+     // send events as JSON
+    res.json(events);
   });
 }
 
-/**
- * POST /api/events/:id/purchase
- * Purchase tickets for a specific event
+/*
+ * Handles POST requests to /api/events/:id/purchase
+ * 
+ * @function purchase
+ * @description Processes a ticket purchase request for a specific event.
+ * Validates the quantity and updates the database if sufficient tickets are available.
+ * @param {Object} req - The Express request object
+ * @param {Object} res - The Express response object
+ * @returns {void} Sends JSON response with success message or error
  */
 function purchase(req, res) {
-  const eventId = parseInt(req.params.id); // event ID from URL
-  const { quantity } = req.body; // number of tickets to purchase
+  // event ID from URL
+  const eventId = parseInt(req.params.id); 
+  // number of tickets to purchase
+  const { quantity } = req.body; 
 
   // Validate input
   if (!quantity || quantity <= 0) {

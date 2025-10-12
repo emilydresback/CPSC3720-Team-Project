@@ -1,0 +1,11 @@
+### GET all events
+GET http://localhost:6001/api/events
+Accept: application/json
+
+### POST purchase tickets (purchase 2 tickets for event with id=1)
+POST http://localhost:6001/api/events/1/purchase
+Content-Type: application/json
+
+{
+  "quantity": 2
+}
