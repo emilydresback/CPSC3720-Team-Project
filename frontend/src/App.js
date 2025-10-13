@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 
-// simple SkipLink component
 function SkipLink() {
   return (
     <a href="#main" className="skip-link">
@@ -14,34 +13,55 @@ function App() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/events')
-      .then((res) => res.json())
-      .then((data) => setEvents(data))
-      .catch((err) => console.error(err));
+    fetchEvents();
   }, []);
 
-  const buyTicket = (eventName) => {
-    alert(`Ticket purchased for: ${eventName}`);
+  const fetchEvents = () => {
+    fetch('http://localhost:6001/api/events')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch events');
+        return res.json();
+      })
+      .then((data) => setEvents(data))
+      .catch((err) => console.error(err));
+  };
+
+  const buyTicket = (eventId, eventName) => {
+    fetch(`http://localhost:6001/api/events/${eventId}/purchase`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quantity: 1 }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((err) => {
+            throw new Error(err.error || 'Purchase failed');
+          });
+        }
+        return res.json();
+      })
+      .then(() => {
+        alert(`Ticket purchased for: ${eventName}`);
+        fetchEvents(); // update counts
+      })
+      .catch((err) => console.error(err.message));
   };
 
   return (
     <>
-      {/* #2: Skip link goes right at the top so keyboard users can reach it first */}
       <SkipLink />
-
       <header>
         <h1>Clemson Campus Events</h1>
       </header>
-
-      {/* main landmark for accessibility */}
       <main id="main" tabIndex={-1}>
         <ul>
           {events.map((event) => (
             <li key={event.id}>
-              {event.name} – {event.date}{' '}
+              {event.name} – {event.date} (Available: {event.tickets_available}){' '}
               <button
-                onClick={() => buyTicket(event.name)}
+                onClick={() => buyTicket(event.id, event.name)}
                 aria-label={`Buy one ticket for ${event.name}`}
+                disabled={event.tickets_available === 0}
               >
                 Buy Ticket
               </button>
