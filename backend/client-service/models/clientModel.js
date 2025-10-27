@@ -1,4 +1,3 @@
-
 // clientModel.js
 // ================================================
 // This file handles all database operations for the client microservice.
@@ -36,33 +35,78 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 // ------------------------------------------------
-// Database migration: ensure tickets_available column exists
-// If missing, add and initialize it from total_tickets.
-// This prevents requiring a separate migration script.
+// Database initialization: create events table if it doesn't exist
+// Then handle migration for tickets_available column
 // ------------------------------------------------
-  db.serialize(() => {
-  db.all("PRAGMA table_info(events)", (err, cols) => {
-    if (err) {
-      console.error('Failed to read table info:', err.message);
+db.serialize(() => {
+  // First, create the events table if it doesn't exist
+  db.run(`
+    CREATE TABLE IF NOT EXISTS events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      date TEXT NOT NULL,
+      total_tickets INTEGER NOT NULL,
+      tickets_available INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `, (createErr) => {
+    if (createErr) {
+      console.error('Failed to create events table:', createErr.message);
       return;
     }
-    const hasTicketsAvailable = cols && cols.some(c => c.name === 'tickets_available');
-    if (!hasTicketsAvailable) {
-      console.log('Migrating DB: adding tickets_available column to events');
-      db.run('ALTER TABLE events ADD COLUMN tickets_available INTEGER DEFAULT 0', (alterErr) => {
-        if (alterErr) {
-          console.error('Failed to add tickets_available column:', alterErr.message);
-          return;
-        }
-        db.run('UPDATE events SET tickets_available = total_tickets', (updateErr) => {
-          if (updateErr) {
-            console.error('Failed to populate tickets_available:', updateErr.message);
+    console.log('Events table ready');
+    
+    // Now check if we need to migrate or add sample data
+    db.all("PRAGMA table_info(events)", (err, cols) => {
+      if (err) {
+        console.error('Failed to read table info:', err.message);
+        return;
+      }
+      const hasTicketsAvailable = cols && cols.some(c => c.name === 'tickets_available');
+      if (!hasTicketsAvailable) {
+        console.log('Migrating DB: adding tickets_available column to events');
+        db.run('ALTER TABLE events ADD COLUMN tickets_available INTEGER DEFAULT 0', (alterErr) => {
+          if (alterErr) {
+            console.error('Failed to add tickets_available column:', alterErr.message);
             return;
           }
-          console.log('DB migration complete: tickets_available populated.');
+          db.run('UPDATE events SET tickets_available = total_tickets', (updateErr) => {
+            if (updateErr) {
+              console.error('Failed to populate tickets_available:', updateErr.message);
+              return;
+            }
+            console.log('DB migration complete: tickets_available populated.');
+          });
         });
+      }
+      
+      // Add sample events if table is empty
+      db.get('SELECT COUNT(*) as count FROM events', (countErr, row) => {
+        if (row && row.count === 0) {
+          console.log('Inserting sample events...');
+          const sampleEvents = [
+            { name: 'Clemson vs FSU Football', date: '2025-11-01', total_tickets: 50 },
+            { name: 'Campus Concert Series', date: '2025-11-15', total_tickets: 100 },
+            { name: 'Homecoming Tailgate', date: '2025-11-08', total_tickets: 75 },
+            { name: 'Student Technology Expo', date: '2025-12-05', total_tickets: 200 }
+          ];
+          
+          sampleEvents.forEach(event => {
+            db.run(
+              'INSERT INTO events (name, date, total_tickets, tickets_available) VALUES (?, ?, ?, ?)',
+              [event.name, event.date, event.total_tickets, event.total_tickets],
+              (insertErr) => {
+                if (insertErr) {
+                  console.error('Failed to insert sample event:', insertErr.message);
+                } else {
+                  console.log(`Added event: ${event.name}`);
+                }
+              }
+            );
+          });
+        }
       });
-    }
+    });
   });
 });
 
@@ -114,7 +158,7 @@ function getAllEvents(callback) {
  * @function purchaseTickets
  * @description Safely decrements available tickets using an atomic SQL update.
  * Prevents overselling by ensuring updates occur only when enough tickets remain.
- * Uses SQLite’s implicit transaction protection for atomicity.
+ * Uses SQLite's implicit transaction protection for atomicity.
  *
  * @param {number} eventId - The ID of the event to purchase tickets for
  * @param {number} quantity - The number of tickets to purchase
