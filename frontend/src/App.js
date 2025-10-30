@@ -80,15 +80,29 @@ function App() {
 
     // 3. Final status and fetch
     if (successfulBookings === quantity) {
-        setStatus(`✅ Successfully booked all ${quantity} tickets for ${eventName}!`);
-        // Re-fetch to ensure sync with backend, reversing optimistic update if necessary
-        fetchEvents();
-        return true;
-    } else {
-        setStatus(`⚠️ Only ${successfulBookings} of ${quantity} tickets booked for ${eventName}. Check backend log. Restoring ticket count...`);
-        // Re-fetch to restore correct ticket count if partial failure occurred
-        fetchEvents();
-        return false;
+      // FIX: Set status first and then immediately call fetchEvents()
+      const successMessage = `✅ Successfully booked all ${quantity} tickets for ${eventName}!`;
+      setStatus(successMessage); 
+      
+      // Use a short timeout before re-fetching to let the user see the success message
+      // before the ticket count updates and the status is potentially cleared/refreshed.
+      setTimeout(() => {
+          fetchEvents();
+          // Clear status after a short delay to keep the UI clean after the booking is done
+          setTimeout(() => setStatus(''), 3000); 
+      }, 1000); // 500ms delay to display the success message
+      
+      return true;
+  } else if (successfulBookings > 0) {
+      setStatus(`⚠️ Only ${successfulBookings} of ${quantity} tickets booked for ${eventName}. Restoring ticket count...`);
+      fetchEvents();
+      return false;
+    } 
+    else {
+      // Full failure (0 successful bookings)
+      setStatus(`❌ Failed to book any tickets for ${eventName}. Check availability or network connection.`);
+      fetchEvents();
+      return false;
     }
   };
 
@@ -168,11 +182,11 @@ function App() {
             
             // Pattern 1: Find the Event Name (highly resilient)
             // Captures text between an introductory phrase (The/for the) and a closing phrase (has X tickets/on/?)
-            const eventNameMatch = lastAIMessage.text.match(/(?:The|for the|for)\s+(.*?)\s+(?:has\s+\d+\s+tickets\s+available|on|\?|\.$)/i);
+            const eventNameMatch = lastAIMessage.text.match(/(?:for|to)\s+(.*?)\s+(?:on|,\s+\w+|\?|\.$)/i);
             
             // Pattern 2: Find the Quantity (FIXED: Now requires 'book' or 'confirm' nearby to prioritize requested quantity)
             // Captures the number/word X from "book X tickets" or "confirm the booking for X tickets"
-            const quantityMatch = lastAIMessage.text.match(/(?:book|booking for|confirming)\s+(\d+|\w+)\s+tickets?/i);
+            const quantityMatch = lastAIMessage.text.match(/(\d+|\w+)\s+ticket(s)?/i);
 
             if (eventNameMatch && quantityMatch) {
                 
