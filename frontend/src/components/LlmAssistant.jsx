@@ -1,105 +1,302 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 
-const API = 'http://localhost:7001/api/llm';
+/**
+ * LLM ASSISTANT COMPONENT - UPDATED VERSION
+ * Connects to LLM service on port 7001
+ */
+const LlmAssistant = () => {
+  const [messages, setMessages] = useState([
+    { sender: 'llm', text: "Hello! I'm your TigerTix assistant. How can I help you today?" }
+  ]);
+  const [userInput, setUserInput] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [isLLMLoading, setIsLLMLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [isMinimized, setIsMinimized] = useState(true);
+  const chatWindowRef = useRef(null);
+  const recognitionRef = useRef(null);
 
-export default function LlmAssistant() {
-  const [input, setInput] = useState('');
-  const [events, setEvents] = useState([]);
-  const [parsed, setParsed] = useState(null);
-  const [pending, setPending] = useState(null);
-  const [message, setMessage] = useState('');
+  // ✅ CORRECT PORT - LLM SERVICE ON 7001
+  const LLM_API_URL = 'http://localhost:7001/api/llm';
 
-  useEffect(() => {
-    fetch(`${API}/events`).then(r => r.json()).then(d => setEvents(d.events || []));
+  /** Play beep before recording */
+  const playStartBeep = () => {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const audioContext = new AudioContext();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.05);
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (e) {
+      console.error("Beep failed:", e);
+    }
+  };
+
+  /** Text-to-speech */
+  const speakResponse = (text) => {
+    try {
+      const synth = window.speechSynthesis;
+      if (!synth) return;
+      synth.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      synth.speak(utterance);
+    } catch (e) {
+      console.error("TTS error:", e);
+    }
+  };
+
+  /** Get LLM response */
+  const getLLMResponse = useCallback(async (prompt) => {
+    setIsLLMLoading(true);
+    try {
+      console.log('Calling LLM API at:', LLM_API_URL); // Debug log
+      const response = await fetch(LLM_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: prompt })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('LLM Response:', data); // Debug log
+      return data.reply || "Sorry, I didn't get a response.";
+    } catch (err) {
+      console.error("LLM API Error:", err);
+      return `Error: ${err.message}. Make sure LLM service is running on port 7001.`;
+    } finally {
+      setIsLLMLoading(false);
+    }
   }, []);
 
-  async function handleParse() {
-    setMessage('');
-    const res = await fetch(`${API}/parse`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ text: input })
-    });
-    const data = await res.json();
-    setParsed(data);
-    // If ask to show events:
-    if (data.intent === 'show_events') {
-      setMessage('Here are events with tickets available.');
-    } else if (data.intent === 'book') {
-      setMessage(`I can prepare a booking for "${data.event}" x${data.tickets}. Review and confirm?`);
-    } else {
-      setMessage('Sorry—I didn’t catch that. Try: "Book two tickets for Jazz Night."');
+  /** Process user input */
+  const processUserInput = useCallback(async (text) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    
+    setMessages(prev => [...prev, { sender: 'user', text: trimmed }]);
+    setUserInput('');
+    setStatusMessage('Thinking...');
+    
+    const reply = await getLLMResponse(trimmed);
+    
+    setMessages(prev => [...prev, { sender: 'llm', text: reply }]);
+    speakResponse(reply);
+    setStatusMessage('');
+  }, [getLLMResponse]);
+
+  /** Speech recognition setup */
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setStatusMessage('Voice not supported in this browser.');
+      return;
     }
+    
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognitionRef.current = recognition;
+    
+    recognition.onstart = () => {
+      setIsRecording(true);
+      setStatusMessage('Listening...');
+    };
+    
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      processUserInput(transcript);
+    };
+    
+    recognition.onend = () => setIsRecording(false);
+    
+    recognition.onerror = (e) => {
+      console.error("Speech error:", e);
+      setIsRecording(false);
+      setStatusMessage('Voice error. Try again.');
+    };
+  }, [processUserInput]);
+
+  /** Toggle mic */
+  const toggleRecording = () => {
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
+    
+    if (isRecording) {
+      recognition.stop();
+    } else {
+      playStartBeep();
+      recognition.start();
+    }
+  };
+
+  // Minimized button
+  if (isMinimized) {
+    return (
+      <button
+        onClick={() => setIsMinimized(false)}
+        style={{
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          backgroundColor: '#f56624',
+          color: 'white',
+          border: 'none',
+          fontSize: '24px',
+          cursor: 'pointer',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+        }}
+        aria-label="Open chat"
+      >
+        🎤
+      </button>
+    );
   }
 
-  async function handlePrepare() {
-    if (!parsed || parsed.intent !== 'book') return;
-    const res = await fetch(`${API}/prepare`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ event: parsed.event, tickets: parsed.tickets })
-    });
-    const data = await res.json();
-    if (data.error) { setMessage(data.error); return; }
-    setPending(data);
-    setMessage(`Ready to book: ${data.summary}. Click Confirm to finalize.`);
-  }
-
-  async function handleConfirm() {
-    if (!pending?.pendingId) return;
-    const res = await fetch(`${API}/confirm`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ pendingId: pending.pendingId })
-    });
-    const data = await res.json();
-    if (data.error) { setMessage(data.error); return; }
-    setMessage(data.message || 'Booked!');
-    setPending(null);
-    // refresh events list to reflect updated counts
-    const e = await fetch(`${API}/events`).then(r => r.json());
-    setEvents(e.events || []);
-  }
-
+  // Expanded chat
   return (
-    <div className="llm-assistant" style={{maxWidth: 600, margin: '2rem auto'}}>
-      <h2>LLM Booking Assistant (Guest)</h2>
-
-      <div style={{display:'flex', gap:8}}>
-        <input
-          aria-label="Chat message"
-          placeholder='Try: "Book two tickets for Jazz Night." or "Show available events".'
-          value={input}
-          onChange={e=>setInput(e.target.value)}
-          style={{flex:1, padding:8}}
-        />
-        <button onClick={handleParse}>Send</button>
+    <div
+      style={{
+        width: '340px',
+        height: '420px',
+        backgroundColor: '#fff',
+        borderRadius: '16px',
+        boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Header */}
+      <div style={{
+        padding: '10px',
+        backgroundColor: '#f56624',
+        color: 'white',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}>
+        <strong>LLM Booking Assistant</strong>
+        <button
+          onClick={() => setIsMinimized(true)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'white',
+            fontSize: '18px',
+            cursor: 'pointer',
+          }}
+        >
+          ✕
+        </button>
       </div>
 
-      {message && <p style={{marginTop:12}}>{message}</p>}
+      {/* Messages */}
+      <div
+        ref={chatWindowRef}
+        style={{
+          flexGrow: 1,
+          overflowY: 'auto',
+          padding: '12px',
+          backgroundColor: '#f9f9f9',
+        }}
+      >
+        {messages.map((m, i) => (
+          <div key={i} style={{
+            textAlign: m.sender === 'user' ? 'right' : 'left',
+            margin: '8px 0',
+          }}>
+            <span
+              style={{
+                display: 'inline-block',
+                background: m.sender === 'user' ? '#a556ef' : '#ee804d',
+                color: 'white',
+                borderRadius: '10px',
+                padding: '8px 10px',
+                maxWidth: '80%',
+              }}
+            >
+              {m.text}
+            </span>
+          </div>
+        ))}
+        {isLLMLoading && (
+          <div style={{ textAlign: 'left' }}>
+            <span style={{
+              display: 'inline-block',
+              background: '#ddd',
+              borderRadius: '10px',
+              padding: '8px 10px',
+            }}>
+              ...
+            </span>
+          </div>
+        )}
+      </div>
 
-      {parsed?.intent === 'show_events' && (
-        <div style={{marginTop:16}}>
-          <h3>Available Events</h3>
-          <ul>
-            {events.map(ev => (
-              <li key={ev.id}>
-                <strong>{ev.name}</strong> — {ev.date} — {ev.available_tickets} left
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {parsed?.intent === 'book' && !pending && (
-        <div style={{marginTop:16}}>
-          <button onClick={handlePrepare} aria-label="Prepare booking">Prepare Booking</button>
-        </div>
-      )}
-
-      {pending && (
-        <div style={{marginTop:16, border:'1px solid #ccc', padding:12}}>
-          <p><strong>Pending:</strong> {pending.summary}</p>
-          <button onClick={handleConfirm} aria-label="Confirm booking">Confirm Booking</button>
+      {/* Input */}
+      <div style={{
+        borderTop: '1px solid #eee',
+        padding: '8px',
+        display: 'flex',
+        alignItems: 'center',
+      }}>
+        <button
+          onClick={toggleRecording}
+          style={{
+            background: isRecording ? '#dc3545' : '#f56624',
+            color: 'white',
+            border: 'none',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            fontSize: '16px',
+            cursor: 'pointer',
+            marginRight: '8px',
+          }}
+        >
+          🎤
+        </button>
+        <input
+          type="text"
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && processUserInput(userInput)}
+          placeholder="Type or speak..."
+          style={{
+            flex: 1,
+            borderRadius: '12px',
+            border: '1px solid #a71ae4',
+            padding: '8px',
+          }}
+        />
+      </div>
+      
+      {statusMessage && (
+        <div style={{
+          textAlign: 'center',
+          fontSize: '0.8rem',
+          color: '#666',
+          padding: '6px',
+        }}>
+          {statusMessage}
         </div>
       )}
     </div>
   );
-}
+};
+
+export default LlmAssistant;

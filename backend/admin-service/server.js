@@ -27,3 +27,14 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Admin microservice running on port ${PORT}`);
 });
+
+
+
+module.exports = app;
+
+// Keep your existing app.listen() but wrap it:
+if (require.main === module) {
+  app.listen(5001, () => {
+    console.log('Admin service on port 5001');
+  });
+}

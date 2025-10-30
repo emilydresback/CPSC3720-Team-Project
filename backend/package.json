@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --forceExit",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage --forceExit",
+    "test:admin": "jest admin-service --forceExit",
+    "test:client": "jest client-service --forceExit"
   },
   "keywords": [],
   "author": "",
@@ -15,5 +19,9 @@
     "express": "^5.1.0",
     "node-fetch": "^2.7.0",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "supertest": "^7.1.4"
   }
 }

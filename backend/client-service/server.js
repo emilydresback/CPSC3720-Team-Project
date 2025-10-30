@@ -28,8 +28,8 @@ const app = express();
 
 // Enable Cross-Origin Resource Sharing (CORS)
 // so that frontend clients (e.g., web UI) can access the API
-
 app.use(cors());
+
 // Parse JSON request bodies
 app.use(express.json());
 
@@ -41,9 +41,16 @@ app.use(express.json());
 app.use('/api', clientRoutes);
 
 // ------------------------------------------------
-// SERVER STARTUP
+// EXPORT FOR TESTING
 // ------------------------------------------------
-const PORT = 6001;
-app.listen(PORT, () => {
-  console.log(`Client service running on http://localhost:${PORT}`);
-});
+module.exports = app;
+
+// ------------------------------------------------
+// SERVER STARTUP (only when run directly)
+// ------------------------------------------------
+if (require.main === module) {
+  const PORT = 6001;
+  app.listen(PORT, () => {
+    console.log(`Client service running on http://localhost:${PORT}`);
+  });
+}
