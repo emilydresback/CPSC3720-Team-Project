@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import './App.css';
+import LlmAssistant from './components/LlmAssistant';
 
 /**
  * Skip link for screen readers — allows visually impaired users
@@ -87,6 +88,7 @@ function App() {
         zIndex: 9999,
       }}>
         <VoiceAssistant />
+        <LlmAssistant />
       </div>
     </>
   );
