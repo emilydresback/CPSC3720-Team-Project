@@ -1,18 +1,21 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
 .pnp.js
+
+# dependencies lock files (often committed, but include if you prefer to manage dependencies manually)
+# package-lock.json
 
 # testing
 /coverage
 
 # production
 /build
+/dist # Common build directory name
 
 # misc
 .DS_Store
+.env
 .env.local
 .env.development.local
 .env.test.local
@@ -21,3 +24,13 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+pnpm-lock.yaml 
+
+# ADDED LINES TO IGNORE DATABASE AND MODULES
+/backend/node_modules
+/frontend/node_modules
+/backend/shared-db/*.sqlite
+/backend/shared-db/*.sqlite-shm
+/backend/shared-db/*.sqlite-wal
+/backend/*.sqlite

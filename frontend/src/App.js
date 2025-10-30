@@ -18,15 +18,20 @@ function App() {
   const recognizerRef = useRef(null);
   const audioCtxRef = useRef(null);
 
+  // --- MOCK/PLACEHOLDER LLM API KEY (Use your actual key via .env) ---
+  const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
+
   // ---------- FETCH EVENTS ----------
   const fetchEvents = async () => {
     try {
-      const res = await fetch("http://localhost:6001/api/events");
+      // NOTE: Using port 6001 for events
+      const res = await fetch("http://localhost:6001/api/events"); 
       const data = await res.json();
       setEvents(Array.isArray(data) ? data : data.events || []);
+      setStatus(""); // Clear status on success
     } catch (err) {
       console.error(err);
-      setStatus("⚠️ Failed to load events from backend.");
+      setStatus("⚠️ Failed to load events from backend (port 6001). Check if server.js is running.");
     }
   };
 
@@ -55,7 +60,8 @@ function App() {
     // 2. Perform the booking action by looping the purchase call
     for(let i = 0; i < quantity; i++) {
         try {
-            const res = await fetch(
+            // CRITICAL FIX: Changed host from 5000 to 6001
+            const res = await fetch( 
                 `http://localhost:6001/api/events/${id}/purchase`,
                 { method: "POST", headers: { "Content-Type": "application/json" } }
             );
@@ -137,8 +143,7 @@ function App() {
     const corsProxy = 'https://corsproxy.io/?';
     const openaiUrl = 'https://api.openai.com/v1/chat/completions';
     const finalUrl = `${corsProxy}${encodeURIComponent(openaiUrl)}`;
-    const OPENAI_API_KEY = "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";
-
+    
     // --- Message Construction for LLM ---
     let messages = [
       { role: "system", content: systemPrompt },
