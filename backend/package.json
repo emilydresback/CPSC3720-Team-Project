@@ -1,16 +1,15 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "tigertix-backend",
+  "private": true,
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "admin": "node backend/admin-service/server.js",
+    "client": "node backend/client-service/server.js",
+    "initdb": "sqlite3 backend/shared-db/database.sqlite < backend/shared-db/init.sql"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.7"
   }
 }
