@@ -24,14 +24,13 @@ function App() {
   // ---------- FETCH EVENTS ----------
   const fetchEvents = async () => {
     try {
-      // NOTE: Using port 6001 for events
       const res = await fetch("http://localhost:6001/api/events"); 
       const data = await res.json();
       setEvents(Array.isArray(data) ? data : data.events || []);
       setStatus(""); // Clear status on success
     } catch (err) {
       console.error(err);
-      setStatus("⚠️ Failed to load events from backend (port 6001). Check if server.js is running.");
+      setStatus("Failed to load events from backend (port 6001). Check if server.js is running.");
     }
   };
 
@@ -42,11 +41,11 @@ function App() {
     const eventToBook = events.find(e => e.id === id);
 
     if (!eventToBook || eventToBook.tickets_available < quantity || quantity <= 0) {
-        setStatus(`❌ Booking aborted: Not enough tickets or invalid quantity for ${eventName}.`);
+        setStatus(`Booking aborted: Not enough tickets or invalid quantity for ${eventName}.`);
         return false;
     }
 
-    setStatus(`⏳ Attempting to book ${quantity} ticket(s) for ${eventName}...`);
+    setStatus(`Attempting to book ${quantity} ticket(s) for ${eventName}...`);
     
     let successfulBookings = 0;
     
@@ -60,7 +59,6 @@ function App() {
     // 2. Perform the booking action by looping the purchase call
     for(let i = 0; i < quantity; i++) {
         try {
-            // CRITICAL FIX: Changed host from 5000 to 6001
             const res = await fetch( 
                 `http://localhost:6001/api/events/${id}/purchase`,
                 { method: "POST", headers: { "Content-Type": "application/json" } }
@@ -81,7 +79,7 @@ function App() {
     // 3. Final status and fetch
     if (successfulBookings === quantity) {
       // FIX: Set status first and then immediately call fetchEvents()
-      const successMessage = `✅ Successfully booked all ${quantity} tickets for ${eventName}!`;
+      const successMessage = `Successfully booked all ${quantity} tickets for ${eventName}!`;
       setStatus(successMessage); 
       
       // Use a short timeout before re-fetching to let the user see the success message
@@ -90,17 +88,17 @@ function App() {
           fetchEvents();
           // Clear status after a short delay to keep the UI clean after the booking is done
           setTimeout(() => setStatus(''), 3000); 
-      }, 1000); // 500ms delay to display the success message
+      }, 1000); // 1000ms delay to display the success message
       
       return true;
   } else if (successfulBookings > 0) {
-      setStatus(`⚠️ Only ${successfulBookings} of ${quantity} tickets booked for ${eventName}. Restoring ticket count...`);
+      setStatus(`Only ${successfulBookings} of ${quantity} tickets booked for ${eventName}. Restoring ticket count...`);
       fetchEvents();
       return false;
     } 
     else {
       // Full failure (0 successful bookings)
-      setStatus(`❌ Failed to book any tickets for ${eventName}. Check availability or network connection.`);
+      setStatus(`Failed to book any tickets for ${eventName}. Check availability or network connection.`);
       fetchEvents();
       return false;
     }
@@ -248,7 +246,7 @@ function App() {
             }
         } else {
             reply = `Sorry, I couldn't complete the booking. The event was not found, the quantity was invalid (${quantity}), or tickets sold out.`;
-            setStatus(`❌ Booking aborted: Check availability or event name.`);
+            setStatus(`Booking aborted: Check availability or event name.`);
         }
         
         setChatLog((prev) => [...prev, { sender: "ai", text: reply }]);
@@ -279,7 +277,7 @@ function App() {
         const errData = await res.json().catch(() => ({}));
         console.error("OpenAI API Error:", res.status, errData);
         const errorMessage = errData?.error?.message || `API request failed with status: ${res.status}`;
-        const fail = `❌ LLM Error: ${errorMessage}. The CORS proxy may be unstable, or the API key may be invalid/expired.`;
+        const fail = `LLM Error: ${errorMessage}. The CORS proxy may be unstable, or the API key may be invalid/expired.`;
         setChatLog((prev) => [...prev, { sender: "ai", text: fail }]);
         speak(fail);
         return;
@@ -314,7 +312,7 @@ function App() {
 
           } else {
               reply += ` (Internal App Note: Booking failed—event not found, quantity invalid, or sold out: ${eventToBook ? eventToBook.tickets_available : 'N/A'}).`;
-              setStatus(`❌ Booking aborted: Check availability or event name.`);
+              setStatus(`Booking aborted: Check availability or event name.`);
           }
       }
       // --- END ACTION PARSING LOGIC ---
@@ -323,7 +321,7 @@ function App() {
       speak(reply);
     } catch (err) {
       console.error(err);
-      const fail = "⚠️ Error contacting the LLM.";
+      const fail = "Error contacting the LLM.";
       setChatLog((prev) => [...prev, { sender: "ai", text: fail }]);
       speak(fail);
     }
@@ -362,7 +360,7 @@ function App() {
 
   const startListening = async () => {
     if (!canSTT) {
-      setStatus("⚠️ Speech recognition not supported in this browser.");
+      setStatus("Speech recognition not supported in this browser.");
       return;
     }
     await beep();
@@ -378,7 +376,7 @@ function App() {
       recog.onerror = (e) => {
         console.error(e);
         setListening(false);
-        setStatus("⚠️ Microphone error or permission denied.");
+        setStatus("Microphone error or permission denied.");
       };
       recog.onend = () => setListening(false);
       recog.onresult = (e) => {
@@ -392,7 +390,7 @@ function App() {
       recog.start();
     } catch (err) {
       console.error(err);
-      setStatus("⚠️ Could not start recognition.");
+      setStatus("Could not start recognition.");
       setListening(false);
     }
   };
@@ -406,7 +404,7 @@ function App() {
   return (
     <div className="App" role="main">
       <header>
-        <h1 id="app-title">🎟️ TigerTix Assistant</h1>
+        <h1 id="app-title"> TigerTix Assistant</h1>
       </header>
 
       <div aria-live="polite" className="status-container">
@@ -446,7 +444,7 @@ function App() {
 
         {/* CHAT + MIC */}
         <section aria-labelledby="assistant-heading" className="chat-section card">
-          <h2 id="assistant-heading">💬 Assistant Chat</h2>
+          <h2 id="assistant-heading"> Assistant Chat</h2>
 
           <div className="chat-box" aria-live="polite">
             {chatLog.map((m, i) => (
@@ -504,7 +502,7 @@ function App() {
         </section>
       </div>
 
-      {/* INLINE STYLES (NEW WHITE/ORANGE/PURPLE THEME - RETAINED) */}
+      {/* INLINE STYLES */}
       <style>{`
         /* --- GLOBAL STYLES (WHITE/PURPLE/ORANGE) --- */
         :root {

@@ -27,7 +27,7 @@ yarn-error.log*
 pnpm-debug.log*
 pnpm-lock.yaml 
 
-# ADDED LINES TO IGNORE DATABASE AND MODULES
+# IGNORE DATABASE AND MODULES
 /backend/node_modules
 /frontend/node_modules
 /backend/shared-db/*.sqlite
