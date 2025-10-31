@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Test coverage
+coverage/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+test-*.db
+
+# Test artifacts
+junit.xml
+
+# Build
+dist/
+build/
+
+# Logs
+*.log
