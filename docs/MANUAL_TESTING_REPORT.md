@@ -388,7 +388,7 @@ This report documents the manual testing conducted for TigerTix Sprint 2, focusi
 - ARIA live regions announced changes
 - Successfully completed booking using only NVDA
 
-**WCAG Compliance:** Level AA ✓
+**WCAG Compliance:** Level AA  
 
 ---
 
@@ -417,7 +417,7 @@ This report documents the manual testing conducted for TigerTix Sprint 2, focusi
 - Voice interface announced: "Microphone button, Activate Voice Command"
 - Full accessibility confirmed
 
-**WCAG Compliance:** Level AA ✓
+**WCAG Compliance:** Level AA  
 
 ---
 
@@ -447,7 +447,7 @@ This report documents the manual testing conducted for TigerTix Sprint 2, focusi
 - Escape closes modals
 - No keyboard traps found
 
-**WCAG Compliance:** Level AA ✓
+**WCAG Compliance:** Level AA  
 
 ---
 
@@ -468,13 +468,13 @@ This report documents the manual testing conducted for TigerTix Sprint 2, focusi
 - Focus indicators meet 3:1 ratio
 
 **Actual Result:**   **PASS**
-- Body text: #333 on #fff = 12.6:1 ✓
-- Buttons: #fff on #007bff = 8.6:1 ✓
-- Links: #0056b3 on #fff = 8.2:1 ✓
-- Errors: #721c24 on #f8d7da = 6.5:1 ✓
-- Focus: #0066ff on #fff = 8.6:1 ✓
+- Body text: #333 on #fff = 12.6:1  
+- Buttons: #fff on #007bff = 8.6:1  
+- Links: #0056b3 on #fff = 8.2:1  
+- Errors: #721c24 on #f8d7da = 6.5:1  
+- Focus: #0066ff on #fff = 8.6:1  
 
-**WCAG Compliance:** Level AAA (exceeds AA) ✓
+**WCAG Compliance:** Level AAA (exceeds AA)  
 
 ---
 
@@ -503,7 +503,7 @@ This report documents the manual testing conducted for TigerTix Sprint 2, focusi
 - Buttons remained accessible
 - Forms fully functional at 200%
 
-**WCAG Compliance:** Level AA ✓
+**WCAG Compliance:** Level AA  
 
 ---
 
@@ -531,7 +531,7 @@ This report documents the manual testing conducted for TigerTix Sprint 2, focusi
 - aria-live="polite" working correctly
 - No repeated announcements
 
-**WCAG Compliance:** Level AA ✓
+**WCAG Compliance:** Level AA  
 
 ---
 
