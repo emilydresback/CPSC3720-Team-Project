@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "./context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function App() {
   // ---------- DATA ----------
@@ -21,6 +23,25 @@ function App() {
   // --- MOCK/PLACEHOLDER LLM API KEY (Use your actual key via .env) ---
   const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
 
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  // ---------- LOGOUT ----------
+  const handleLogoutClick = async () => {
+    try {
+      await fetch("http://localhost:7005/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+  
+      logout();
+      setStatus("Logged out.");
+    } catch (err) {
+      console.error("Logout error:", err);
+      setStatus("Logout failed.");
+    }
+  };
+  
   // ---------- FETCH EVENTS ----------
   const fetchEvents = async () => {
     try {
@@ -403,9 +424,42 @@ function App() {
   // ---------- UI (WHITE/ORANGE/PURPLE DESIGN - RETAINED) ----------
   return (
     <div className="App" role="main">
-      <header>
-        <h1 id="app-title"> TigerTix Assistant</h1>
+      <header className="auth-header">
+        <h1 id="app-title">TigerTix Assistant</h1>
+
+        <div className="auth-controls">
+          {!user && (
+            <>
+              <button
+                className="auth-btn"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </button>
+
+              <button
+                className="auth-btn"
+                onClick={() => navigate("/register")}
+              >
+                Register
+              </button>
+            </>
+          )}
+
+          {user && (
+            <>
+              <span className="auth-user">Logged in as {user.email}</span>
+              <button
+                className="auth-btn logout"
+                onClick={handleLogoutClick}
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </div>
       </header>
+
 
       <div aria-live="polite" className="status-container">
         {status && <p className="status">{status}</p>}
@@ -556,6 +610,46 @@ function App() {
             padding: 0.75rem;
             border-radius: 8px;
             font-weight: 500;
+        }
+
+        /* --- AUTH HEADER --- */
+        .auth-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .auth-controls {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .auth-user {
+          font-weight: 500;
+          color: var(--color-dark-text);
+        }
+
+        .auth-btn {
+          background-color: var(--color-purple);
+          color: white;
+          border: none;
+          border-radius: 6px;
+          padding: 0.4rem 0.9rem;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+        }
+
+        .auth-btn:hover {
+          background-color: var(--color-orange);
+        }
+
+        .auth-btn.logout {
+          background-color: var(--color-orange);
+        }
+
+        .auth-btn.logout:hover {
+          background-color: #d96900;
         }
 
         /* --- LAYOUT --- */
