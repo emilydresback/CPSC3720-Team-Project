@@ -23,15 +23,12 @@ function LoginForm() {
     try {
       const res = await fetch("http://localhost:7005/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
-
       if (!res.ok) {
         setStatusMessage(data.error || "Login failed.");
         return;
@@ -39,8 +36,7 @@ function LoginForm() {
 
       login({ user: data.user, token: data.token });
       setStatusMessage("Login successful.");
-    } catch (err) {
-      console.error("Error in login request:", err);
+    } catch {
       setStatusMessage("Unexpected error. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -48,10 +44,10 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div className="auth-card">
       <h2>Login</h2>
 
-      <div>
+      <form onSubmit={handleSubmit} className="auth-form">
         <label htmlFor="login-email">Email</label>
         <input
           id="login-email"
@@ -60,9 +56,7 @@ function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-      </div>
 
-      <div>
         <label htmlFor="login-password">Password</label>
         <input
           id="login-password"
@@ -72,15 +66,99 @@ function LoginForm() {
           minLength={6}
           required
         />
-      </div>
 
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Logging in..." : "Login"}
-      </button>
+        <button type="submit" disabled={isSubmitting} className="auth-submit">
+          {isSubmitting ? "Logging in..." : "Login"}
+        </button>
 
-      {statusMessage && <p>{statusMessage}</p>}
-    </form>
+        {statusMessage && <p className="auth-status">{statusMessage}</p>}
+      </form>
+
+      <style>{authStyles}</style>
+    </div>
   );
 }
+
+// updated UI
+const authStyles = `
+  :root {
+    --color-purple: #522D80;
+    --color-orange: #F57D00;
+    --color-light-gray: #F0F0F0;
+    --color-dark-text: #333333;
+  }
+
+  .auth-card {
+    max-width: 420px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background: #fff;
+    border: 1px solid var(--color-light-gray);
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  }
+
+  h2 {
+    color: var(--color-purple);
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--color-orange);
+    padding-bottom: .5rem;
+    text-align: center;
+  }
+
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  label {
+    font-weight: 600;
+    color: var(--color-dark-text);
+  }
+
+  input {
+    padding: .75rem;
+    border-radius: 6px;
+    border: 1px solid #CCC;
+    background-color: #FFF;
+    font-size: 1rem;
+  }
+
+  input:focus {
+    outline: 2px solid var(--color-purple);
+  }
+
+  .auth-submit {
+    background: var(--color-purple);
+    color: white;
+    border: none;
+    padding: .75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: .5rem;
+  }
+
+  .auth-submit:hover {
+    background: var(--color-orange);
+  }
+
+  .auth-submit:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  .auth-status {
+    margin-top: 1rem;
+    padding: .75rem;
+    border-radius: 6px;
+    background: #FFF3E0;
+    border: 1px solid var(--color-orange);
+    color: var(--color-dark-text);
+    font-weight: 500;
+    text-align: center;
+  }
+`;
 
 export default LoginForm;
