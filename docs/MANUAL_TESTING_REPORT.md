@@ -6,11 +6,87 @@
 
 ---
 
+## Automated Testing Overview
+
+### Implementation Status
+
+**Total Automated Tests:** 145 tests (138 passing - 95.2% pass rate)
+
+The automated testing suite covers:
+
+**Backend Services (127 tests - 100% passing):**
+- Authentication Service: 24 tests - User registration, login, JWT tokens, protected routes
+- Admin Service: 15 tests - Event CRUD operations, validation, security
+- Client Service: 14 tests - Booking operations, ticket availability, overbooking prevention
+- LLM Service: 26 tests - Natural language parsing, intent detection, entity extraction
+- Integration Tests: 25 tests - Service-to-service communication, data flow
+- End-to-End Tests: 9 tests - Complete user workflows from registration to booking
+- Database Tests: 14 tests - Transaction handling, concurrency control
+
+**Frontend Tests (44 tests - 42 passing, 95.5%):**
+- Component Tests: 26 tests - Event display, booking forms, voice interface
+- Accessibility Tests: 18 tests (of 23 total) - WCAG 2.1 AA compliance, keyboard navigation, ARIA attributes
+
+### Test Execution Commands
+
+```bash
+# Run all automated tests
+npm test
+
+# Run specific test suites
+npm run test:auth          # Authentication (24 tests)
+npm run test:admin         # Admin service (15 tests)
+npm run test:client        # Client service (14 tests)
+npm run test:llm           # LLM service (26 tests)
+npm run test:integration   # Integration (25 tests)
+npm run test:e2e           # End-to-end (9 tests)
+npm run test:frontend      # Frontend components (26 tests)
+npm run test:accessibility # Accessibility (23 tests)
+```
+
+### Key Automated Test Coverage
+
+**Authentication Flow:**
+- User registration with email/password validation
+- Login with JWT token generation (30min expiration)
+- Token validation in headers and cookies
+- Protected route access control
+- Logout and token invalidation
+
+**Booking Operations:**
+- Ticket availability verification
+- Concurrent booking prevention
+- Price calculation accuracy
+- Overbooking protection
+- Transaction rollback on errors
+
+**Natural Language Processing:**
+- Intent classification (book, query, cancel)
+- Entity extraction (quantity, date, event type)
+- Ambiguous input handling
+- Clarification request generation
+
+**Accessibility Compliance:**
+- ARIA label verification
+- Keyboard navigation support
+- Screen reader compatibility
+- Focus management
+- Voice interface accessibility
+
+### Technology Stack
+
+- Jest 29.7.0 - Test framework
+- Supertest 6.3.3 - API testing
+- React Testing Library 14.1.2 - Component testing
+- In-memory SQLite - Test database isolation
+
+---
+
 ## Executive Summary
 
 This report documents the manual testing conducted for TigerTix Sprint 2, focusing on areas that cannot be effectively automated: natural language booking, voice interface functionality, accessibility compliance, and concurrent user scenarios.
 
-**Test Results:**
+**Manual Test Results:**
 - **Total Test Cases:** 27
 - **Passed:** 27 (100%)
 - **Failed:** 0

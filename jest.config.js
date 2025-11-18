@@ -6,7 +6,11 @@ module.exports = {
       testMatch: [
         '**/admin-service/tests/**/*.test.js',
         '**/client-service/tests/**/*.test.js',
-        '**/llm-booking-service/tests/**/*.test.js'
+        '**/llm-booking-service/tests/**/*.test.js',
+        '**/backend/user-authentication/tests/**/*.test.js',
+        '**/tests/microservices-integration.test.js',
+        '**/tests/end-to-end.test.js',
+        '**/tests/database-concurrency.test.js'
       ],
       testPathIgnorePatterns: ['/node_modules/', '/frontend/']
     },
