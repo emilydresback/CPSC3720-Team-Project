@@ -25,8 +25,6 @@ Manual testing focused on real-world user interactions that are difficult to aut
 **Expected Result:** System requires explicit confirmation before charging user  
 **Actual Result:** PASS - Confirmation prompt displayed, booking created only after approval
 
-**Screenshot:** LLM confirmation prompt showing event details, price calculation, and "Confirm" button
-
 ---
 
 ### 2. Voice Input/Output Interaction
@@ -70,8 +68,6 @@ Manual testing focused on real-world user interactions that are difficult to aut
 | Booking form | Tab | Blue outline | Present | Announces |
 | Voice button | Enter | Blue outline | "Activate voice input" | Announces |
 | Menu items | Arrow keys | Blue outline | Present | Announces |
-
-**Screenshot:** Keyboard focus on voice input button showing visible blue focus ring
 
 ---
 
