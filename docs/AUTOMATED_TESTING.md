@@ -194,16 +194,16 @@ npm run test:accessibility # 18 tests
 
 ## Coverage Summary
 
-| Component | Tests | Pass Rate |
-|-----------|-------|-----------|
-| Authentication | 24 | 100% |
-| Admin Service | 15 | 100% |
-| Client Service | 14 | 100% |
-| LLM Service | 27 | 100% |
-| Integration | 6 | 100% |
-| End-to-End | 9 | 100% |
-| Frontend | 26 | 100% |
-| Accessibility | 18 | 100% |
+|    Component    | Tests | Pass Rate |
+|-----------------|-------|-----------|
+| Authentication  |   24  |      100% |
+| Admin Service   |   15  |      100% |
+| Client Service  |   14  |      100% |
+| LLM Service     |   27  |      100% |
+| Integration     |    6  |      100% |
+| End-to-End      |    9  |      100% |
+| Frontend        |   26  |      100% |
+| Accessibility   |   18  |      100% |
 | **TOTAL** | **138** | **100%** |
 
 **Features Covered:**
