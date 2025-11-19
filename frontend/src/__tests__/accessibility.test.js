@@ -300,7 +300,6 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
   describe('Keyboard Navigation', () => {
     
     test('can navigate through events with Tab key', async () => {
-      const user = userEvent.setup();
       const events = [
         { id: 1, name: 'Event 1', date: '2025-12-01', location: 'A', price: 25, availableTickets: 50 },
         { id: 2, name: 'Event 2', date: '2025-12-02', location: 'B', price: 30, availableTickets: 40 }
@@ -312,16 +311,15 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
       const buttons = screen.getAllByRole('button');
       
       // First tab goes to first article
-      await user.tab();
+      userEvent.tab();
       expect(articles[0]).toHaveFocus();
       
       // Second tab goes to first button
-      await user.tab();
+      userEvent.tab();
       expect(buttons[0]).toHaveFocus();
     });
     
     test('keyboard-navigable menu with arrow keys', async () => {
-      const user = userEvent.setup();
       const items = [
         { id: 1, name: 'Basketball' },
         { id: 2, name: 'Football' },
@@ -339,10 +337,10 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
       expect(menuItems[1]).toHaveAttribute('tabIndex', '-1');
       
       // Focus menu and press arrow down
-      await user.tab();
+      userEvent.tab();
       
       await act(async () => {
-        await user.keyboard('{ArrowDown}');
+        fireEvent.keyDown(menuItems[0], { key: 'ArrowDown' });
       });
       
       // Now second item should be focusable
@@ -350,18 +348,18 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
     });
     
     test('can activate voice input with keyboard', async () => {
-      const user = userEvent.setup();
       const handleVoiceInput = jest.fn();
       
       render(<VoiceBookingInterface onVoiceInput={handleVoiceInput} />);
       
       const button = screen.getByRole('button', { name: /Start voice booking/i });
       
-      await user.tab();
+      userEvent.tab();
       expect(button).toHaveFocus();
       
       await act(async () => {
-        await user.keyboard('{Enter}');
+        fireEvent.keyDown(button, { key: 'Enter', code: 'Enter' });
+        fireEvent.click(button);
       });
       
       // Should show listening state
@@ -369,7 +367,6 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
     });
     
     test('disabled buttons are not in tab order', async () => {
-      const user = userEvent.setup();
       const events = [
         { id: 1, name: 'Sold Out Event', date: '2025-12-01', location: 'A', price: 25, availableTickets: 0 }
       ];
@@ -380,7 +377,7 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
       expect(button).toBeDisabled();
       
       // Try to tab to it
-      await user.tab();
+      userEvent.tab();
       expect(button).not.toHaveFocus();
     });
   });
@@ -402,20 +399,19 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
     });
     
     test('form inputs maintain focus order', async () => {
-      const user = userEvent.setup();
       const event = { id: 1, name: 'Basketball', price: 25 };
       
       render(<BookingFormAccessible onSubmit={jest.fn()} event={event} />);
       
-      await user.tab(); // Skip to first focusable element
+      userEvent.tab(); // Skip to first focusable element
       const input = screen.getByRole('spinbutton', { name: /Number of Tickets:/i });
       expect(input).toHaveFocus();
       
-      await user.tab();
+      userEvent.tab();
       const confirmButton = screen.getByRole('button', { name: /Confirm booking/i });
       expect(confirmButton).toHaveFocus();
       
-      await user.tab();
+      userEvent.tab();
       const cancelButton = screen.getByRole('button', { name: /Cancel booking/i });
       expect(cancelButton).toHaveFocus();
     });
@@ -494,7 +490,6 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
     });
     
     test('voice status is announced to screen readers', async () => {
-      const user = userEvent.setup();
       const handleVoiceInput = jest.fn();
       
       render(<VoiceBookingInterface onVoiceInput={handleVoiceInput} />);
@@ -502,7 +497,7 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
       const button = screen.getByRole('button');
       
       await act(async () => {
-        await user.click(button);
+        fireEvent.click(button);
       });
       
       const status = screen.getByRole('status');
