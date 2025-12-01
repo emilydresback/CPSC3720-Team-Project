@@ -65,7 +65,10 @@ run_tests() {
     
     # Run backend tests
     echo "Running backend tests..."
-    npm run test:backend
+    npm run test:admin
+    npm run test:client
+    npm run test:llm
+    npm run test:auth
     
     if [ $? -ne 0 ]; then
         echo "Backend tests failed. Deployment aborted."
