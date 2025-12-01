@@ -3,34 +3,34 @@
 # TigerTix Deployment Script
 # Automates the deployment of TigerTix to free hosting platforms
 
-echo "🎫 TigerTix Deployment Automation"
-echo "================================="
+echo "TigerTix Deployment Automation"
+echo "=================================="
 
 # Check if required tools are installed
 check_tools() {
-    echo "📋 Checking required tools..."
+    echo "Checking required tools..."
     
     if ! command -v node &> /dev/null; then
-        echo "❌ Node.js is not installed"
+        echo "Error: Node.js is not installed"
         exit 1
     fi
     
     if ! command -v npm &> /dev/null; then
-        echo "❌ npm is not installed"
+        echo "Error: npm is not installed"
         exit 1
     fi
     
     if ! command -v git &> /dev/null; then
-        echo "❌ Git is not installed"
+        echo "Error: Git is not installed"
         exit 1
     fi
     
-    echo "✅ All required tools are installed"
+    echo "All required tools are installed"
 }
 
 # Install deployment tools
 install_tools() {
-    echo "🔧 Installing deployment tools..."
+    echo "Installing deployment tools..."
     
     # Install Vercel CLI
     if ! command -v vercel &> /dev/null; then
@@ -44,12 +44,12 @@ install_tools() {
         npm install -g @railway/cli
     fi
     
-    echo "✅ Deployment tools installed"
+    echo "Deployment tools installed"
 }
 
 # Run tests before deployment
 run_tests() {
-    echo "🧪 Running tests before deployment..."
+    echo "Running tests before deployment..."
     
     # Install dependencies
     npm install
@@ -68,7 +68,7 @@ run_tests() {
     npm run test:backend
     
     if [ $? -ne 0 ]; then
-        echo "❌ Backend tests failed. Deployment aborted."
+        echo "Backend tests failed. Deployment aborted."
         exit 1
     fi
     
@@ -77,16 +77,16 @@ run_tests() {
     npm run test:frontend
     
     if [ $? -ne 0 ]; then
-        echo "❌ Frontend tests failed. Deployment aborted."
+        echo "Frontend tests failed. Deployment aborted."
         exit 1
     fi
     
-    echo "✅ All tests passed"
+    echo "All tests passed"
 }
 
 # Deploy backend to Railway
 deploy_backend() {
-    echo "🚀 Deploying backend to Railway..."
+    echo "Deploying backend to Railway..."
     
     # Login to Railway (if not already logged in)
     railway login
@@ -108,7 +108,7 @@ deploy_backend() {
     
     # Get deployment URL
     BACKEND_URL=$(railway status --json | jq -r '.deployments[0].url')
-    echo "✅ Backend deployed to: $BACKEND_URL"
+    echo "Backend deployed to: $BACKEND_URL"
     
     # Save URL for frontend configuration
     echo "REACT_APP_API_URL=$BACKEND_URL" > frontend/.env.production
@@ -116,7 +116,7 @@ deploy_backend() {
 
 # Deploy frontend to Vercel
 deploy_frontend() {
-    echo "🌐 Deploying frontend to Vercel..."
+    echo "Deploying frontend to Vercel..."
     
     cd frontend
     
@@ -128,7 +128,7 @@ deploy_frontend() {
     
     # Get deployment URL
     FRONTEND_URL=$(vercel ls tigertix-frontend --json | jq -r '.[0].url' | sed 's/^/https:\/\//')
-    echo "✅ Frontend deployed to: $FRONTEND_URL"
+    echo "Frontend deployed to: $FRONTEND_URL"
     
     cd ..
     
@@ -139,7 +139,7 @@ deploy_frontend() {
 
 # Test deployed application
 test_deployment() {
-    echo "🔍 Testing deployed application..."
+    echo "Testing deployed application..."
     
     # Wait for services to start
     echo "Waiting for services to start..."
@@ -148,23 +148,23 @@ test_deployment() {
     # Test backend health
     echo "Testing backend health..."
     if curl -f "$BACKEND_URL/health" > /dev/null 2>&1; then
-        echo "✅ Backend is healthy"
+        echo "Backend is healthy"
     else
-        echo "⚠️  Backend health check failed"
+        echo "Warning: Backend health check failed"
     fi
     
     # Test frontend
     echo "Testing frontend..."
     if curl -f "$FRONTEND_URL" > /dev/null 2>&1; then
-        echo "✅ Frontend is accessible"
+        echo "Frontend is accessible"
     else
-        echo "⚠️  Frontend health check failed"
+        echo "Warning: Frontend health check failed"
     fi
 }
 
 # Generate deployment summary
 generate_summary() {
-    echo "📋 Generating deployment summary..."
+    echo "Generating deployment summary..."
     
     cat > DEPLOYMENT_SUMMARY.md << EOF
 # TigerTix Deployment Summary
@@ -187,8 +187,8 @@ generate_summary() {
 
 ## Test Results
 - **Total Tests:** 138
-- **Backend Tests:** ✅ Passed
-- **Frontend Tests:** ✅ Passed
+- **Backend Tests:** Passed
+- **Frontend Tests:** Passed
 
 ## Hosting Platforms
 - **Frontend:** Vercel (Free tier)
@@ -196,12 +196,12 @@ generate_summary() {
 - **Database:** SQLite (In-container)
 
 ## Features Available
-- ✅ User Authentication
-- ✅ Event Management
-- ✅ Booking System
-- ✅ Admin Dashboard
-- ✅ LLM-powered Chat
-- ✅ Responsive Design
+- User Authentication
+- Event Management
+- Booking System
+- Admin Dashboard
+- LLM-powered Chat
+- Responsive Design
 
 ## Access Instructions
 1. Visit: $FRONTEND_URL
@@ -214,7 +214,7 @@ generate_summary() {
 - **Clone:** \`git clone https://github.com/$(git config user.name)/CPSC3720-Team-Project.git\`
 EOF
 
-    echo "✅ Deployment summary created: DEPLOYMENT_SUMMARY.md"
+    echo "Deployment summary created: DEPLOYMENT_SUMMARY.md"
 }
 
 # Main deployment function
@@ -230,10 +230,10 @@ main() {
     generate_summary
     
     echo ""
-    echo "🎉 Deployment completed successfully!"
-    echo "📱 Frontend: $FRONTEND_URL"
-    echo "🔧 Backend: $BACKEND_URL"
-    echo "📋 Summary: DEPLOYMENT_SUMMARY.md"
+    echo "Deployment completed successfully!"
+    echo "Frontend: $FRONTEND_URL"
+    echo "Backend: $BACKEND_URL"
+    echo "Summary: DEPLOYMENT_SUMMARY.md"
     echo ""
     echo "Your TigerTix application is now live and accessible!"
 }
