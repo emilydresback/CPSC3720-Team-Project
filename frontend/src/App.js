@@ -49,7 +49,7 @@ function App() {
       setStatus(""); // Clear status on success
     } catch (err) {
       console.error(err);
-      setStatus("Failed to load events from backend (port 6001). Check if server.js is running.");
+      setStatus("Failed to load events from backend. Check network connection.");
     }
   };
 

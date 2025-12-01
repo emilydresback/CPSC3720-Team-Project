@@ -1,5 +1,5 @@
 // API Configuration for production deployment
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6001';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://tigertix-production.up.railway.app';
 
 export const API_ENDPOINTS = {
   // All services run on the same port in production
