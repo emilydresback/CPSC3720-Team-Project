@@ -1,0 +1,63 @@
+name: Deploy TigerTix Application
+
+on:
+  push:
+    branches: [ main, Sprint2v2 ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install root dependencies
+      run: npm install
+    
+    - name: Install backend dependencies
+      run: |
+        cd backend/user-authentication && npm install
+        cd ../admin-service && npm install
+        cd ../client-service && npm install
+        cd ../llm-booking-service && npm install
+    
+    - name: Install frontend dependencies
+      run: cd frontend && npm install
+    
+    - name: Run backend tests
+      run: npm test
+    
+    - name: Run frontend tests
+      run: cd frontend && npm test -- --coverage --watchAll=false
+    
+    - name: Build frontend
+      run: cd frontend && npm run build
+
+  deploy-backend:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Sprint2v2'
+    
+    steps:
+    - name: Deploy to Render
+      run: |
+        echo "Backend deployment will be triggered by Render webhook"
+        curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+  deploy-frontend:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Sprint2v2'
+    
+    steps:
+    - name: Deploy to Vercel
+      run: |
+        echo "Frontend deployment will be triggered by Vercel automatically"
