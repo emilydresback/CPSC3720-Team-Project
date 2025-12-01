@@ -3,7 +3,7 @@
 ## Deployment Status: ✅ LIVE AND FULLY FUNCTIONAL
 
 ### Live URLs
-- **Frontend**: https://frontend-a9iiwe8tu-annas-projects-51838d83.vercel.app
+- **Frontend**: https://frontend-p5hwj4moe-annas-projects-51838d83.vercel.app
 - **Backend API**: https://tigertix-production.up.railway.app/api
 
 ### Services Status
