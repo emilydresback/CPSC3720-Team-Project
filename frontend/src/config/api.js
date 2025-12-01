@@ -1,25 +1,25 @@
 // API Configuration for production deployment
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6001';
 
 export const API_ENDPOINTS = {
-  // Authentication Service (Port 7005)
-  AUTH: `${API_BASE_URL}:7005`,
-  LOGIN: `${API_BASE_URL}:7005/auth/login`,
-  LOGOUT: `${API_BASE_URL}:7005/auth/logout`,
-  REGISTER: `${API_BASE_URL}:7005/auth/register`,
+  // All services run on the same port in production
+  AUTH: `${API_BASE_URL}`,
+  LOGIN: `${API_BASE_URL}/api/auth/login`,
+  LOGOUT: `${API_BASE_URL}/api/auth/logout`,
+  REGISTER: `${API_BASE_URL}/api/auth/register`,
   
-  // Client Service (Port 6001) 
-  CLIENT: `${API_BASE_URL}:6001`,
-  EVENTS: `${API_BASE_URL}:6001/api/events`,
-  BOOKINGS: `${API_BASE_URL}:6001/api/bookings`,
+  // Client Service
+  CLIENT: `${API_BASE_URL}`,
+  EVENTS: `${API_BASE_URL}/api/events`,
+  BOOKINGS: `${API_BASE_URL}/api/bookings`,
   
-  // Admin Service (Port 5001)
-  ADMIN: `${API_BASE_URL}:5001`,
-  ADMIN_EVENTS: `${API_BASE_URL}:5001/api/admin/events`,
+  // Admin Service
+  ADMIN: `${API_BASE_URL}`,
+  ADMIN_EVENTS: `${API_BASE_URL}/api/admin/events`,
   
-  // LLM Service (Port 5003)
-  LLM: `${API_BASE_URL}:5003`,
-  CHAT: `${API_BASE_URL}:5003/api/chat`
+  // LLM Service
+  LLM: `${API_BASE_URL}`,
+  CHAT: `${API_BASE_URL}/api/chat`
 };
 
 // Fetch wrapper with error handling

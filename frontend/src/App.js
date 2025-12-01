@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from "./config/api";
 
 function App() {
   // ---------- DATA ----------
@@ -29,7 +30,7 @@ function App() {
   // ---------- LOGOUT ----------
   const handleLogoutClick = async () => {
     try {
-      await fetch("http://localhost:7005/auth/logout", {
+      await fetch(API_ENDPOINTS.LOGOUT, {
         method: "POST",
         credentials: "include",
       });
@@ -45,7 +46,7 @@ function App() {
   // ---------- FETCH EVENTS ----------
   const fetchEvents = async () => {
     try {
-      const res = await fetch("http://localhost:6001/api/events"); 
+      const res = await fetch(API_ENDPOINTS.EVENTS); 
       const data = await res.json();
       setEvents(Array.isArray(data) ? data : data.events || []);
       setStatus(""); // Clear status on success

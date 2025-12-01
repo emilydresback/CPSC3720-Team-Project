@@ -34,3 +34,5 @@ pnpm-lock.yaml
 /backend/shared-db/*.sqlite-shm
 /backend/shared-db/*.sqlite-wal
 /backend/*.sqlite
+.vercel
+.env*.local
