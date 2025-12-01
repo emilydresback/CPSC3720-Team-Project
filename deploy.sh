@@ -94,12 +94,12 @@ deploy_backend() {
     # Login to Railway (if not already logged in)
     railway login
     
-    # Create new project or use existing
-    railway project new tigertix-backend 2>/dev/null || echo "Using existing project"
+    # Link to project or create new one
+    railway link || railway init
     
-    # Set environment variables
+    # Set environment variables using new CLI syntax
     railway variables set NODE_ENV=production
-    railway variables set JWT_SECRET=$(openssl rand -base64 32)
+    railway variables set JWT_SECRET=$(openssl rand -base64 32 2>/dev/null || echo "fallback_jwt_secret_$(date +%s)")
     railway variables set DATABASE_PATH=./backend/shared-db/database.sqlite
     railway variables set AUTH_PORT=7005
     railway variables set ADMIN_PORT=5001
@@ -107,10 +107,10 @@ deploy_backend() {
     railway variables set LLM_PORT=5003
     
     # Deploy
-    railway up
+    railway up --detach
     
-    # Get deployment URL
-    BACKEND_URL=$(railway status --json | jq -r '.deployments[0].url')
+    # Get deployment URL (fallback if command fails)
+    BACKEND_URL=$(railway status --json 2>/dev/null | jq -r '.deployments[0].url' 2>/dev/null || echo "https://your-railway-app.railway.app")
     echo "Backend deployed to: $BACKEND_URL"
     
     # Save URL for frontend configuration
@@ -123,21 +123,27 @@ deploy_frontend() {
     
     cd frontend
     
-    # Login to Vercel (if not already logged in)
-    vercel login
+    # Check if already logged in, otherwise provide instructions
+    if ! vercel whoami > /dev/null 2>&1; then
+        echo "Please run 'vercel login' first to authenticate with Vercel"
+        echo "Then rerun this script"
+        exit 1
+    fi
     
     # Deploy to production
-    vercel --prod --yes
+    vercel --prod --yes --confirm
     
     # Get deployment URL
-    FRONTEND_URL=$(vercel ls tigertix-frontend --json | jq -r '.[0].url' | sed 's/^/https:\/\//')
+    FRONTEND_URL=$(vercel ls --limit=1 --json 2>/dev/null | jq -r '.[0].url' 2>/dev/null | sed 's/^/https:\/\//' || echo "https://your-vercel-app.vercel.app")
     echo "Frontend deployed to: $FRONTEND_URL"
     
     cd ..
     
     # Update backend CORS configuration
-    railway variables set CORS_ORIGIN=$FRONTEND_URL
-    railway variables set ALLOWED_ORIGINS="$FRONTEND_URL,http://localhost:3000"
+    if command -v railway &> /dev/null; then
+        railway variables set CORS_ORIGIN=$FRONTEND_URL
+        railway variables set ALLOWED_ORIGINS="$FRONTEND_URL,http://localhost:3000"
+    fi
 }
 
 # Test deployed application
