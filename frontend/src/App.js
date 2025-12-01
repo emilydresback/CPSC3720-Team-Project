@@ -21,9 +21,6 @@ function App() {
   const recognizerRef = useRef(null);
   const audioCtxRef = useRef(null);
 
-  // --- MOCK/PLACEHOLDER LLM API KEY (Use your actual key via .env) ---
-  const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
-
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -82,7 +79,7 @@ function App() {
     for(let i = 0; i < quantity; i++) {
         try {
             const res = await fetch( 
-                `http://localhost:6001/api/events/${id}/purchase`,
+                `${API_ENDPOINTS.EVENTS}/${id}/purchase`,
                 { method: "POST", headers: { "Content-Type": "application/json" } }
             );
             if (res.ok) {
@@ -168,182 +165,46 @@ function App() {
     }
   };
 
-  // ---------- LLM CALL: sendToLLM (FINAL FIX: Quantity Bug Fix) ----------
+  // ---------- LLM CALL: sendToLLM (Use simple backend chat service) ----------
   const sendToLLM = async (userText) => {
     const userMsg = { sender: "user", text: userText };
     setChatLog((prev) => [...prev, userMsg]);
 
-    // CORS Proxy and API Key setup (retained for context)
-    const corsProxy = 'https://corsproxy.io/?';
-    const openaiUrl = 'https://api.openai.com/v1/chat/completions';
-    const finalUrl = `${corsProxy}${encodeURIComponent(openaiUrl)}`;
-    
-    // --- Message Construction for LLM ---
-    let messages = [
-      { role: "system", content: systemPrompt },
-      {
-        role: "system",
-        content:
-          "Current events context (name, date, tickets_available):\n" +
-          eventsAsBulletedContext,
-      },
-    ];
-
-    // Check if the user's message is a simple confirmation
-    const isConfirmation = /^\s*(yes|yep|confirm|book\s+it|ok)\s*$/i.test(userText.trim());
-    let forcedActionTag = null; 
-    let aiReplyText = null; 
-
-    // **CRITICAL FIX: ATTEMPT CLIENT-SIDE CONFIRMATION EXECUTION**
-    if (isConfirmation) {
-        const lastAIMessage = chatLog.findLast(m => m.sender === 'ai'); 
-        
-        if (lastAIMessage) {
-            
-            // Pattern 1: Find the Event Name (highly resilient)
-            // Captures text between an introductory phrase (The/for the) and a closing phrase (has X tickets/on/?)
-            const eventNameMatch = lastAIMessage.text.match(/(?:for|to)\s+(.*?)\s+(?:on|,\s+\w+|\?|\.$)/i);
-            
-            // Pattern 2: Find the Quantity (FIXED: Now requires 'book' or 'confirm' nearby to prioritize requested quantity)
-            // Captures the number/word X from "book X tickets" or "confirm the booking for X tickets"
-            const quantityMatch = lastAIMessage.text.match(/(\d+|\w+)\s+ticket(s)?/i);
-
-            if (eventNameMatch && quantityMatch) {
-                
-                // 1. Extract and Clean Event Name
-                let proposedEventName = eventNameMatch[1].trim(); 
-                // Aggressively clean up any trailing dates/commas the LLM might have left in Group 1
-                proposedEventName = proposedEventName.replace(/\s+on\s+.*$/i, '').replace(/,$/, '').trim();
-                
-                // 2. Extract and Convert Quantity
-                // We use the first capture group from the quantity match
-                const proposedQuantityText = quantityMatch[1].trim(); 
-                let proposedQuantity = parseInt(proposedQuantityText, 10);
-                if (isNaN(proposedQuantity)) {
-                    const numberMap = { 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10 };
-                    proposedQuantity = numberMap[proposedQuantityText.toLowerCase()] || 0;
-                }
-                
-                // 3. Match against Canonical Events
-                const matchedEvent = events.find(e => 
-                    // Match if the full canonical name contains the proposed name, or vice versa (for partial matches like "expo")
-                    e.name.toLowerCase().includes(proposedEventName.toLowerCase()) ||
-                    proposedEventName.toLowerCase().includes(e.name.toLowerCase())
-                );
-                
-                if (matchedEvent && proposedQuantity > 0) {
-                    const canonicalEventName = matchedEvent.name; 
-                    
-                    // Create the guaranteed action tag
-                    forcedActionTag = `[ACTION:BOOK|${canonicalEventName}|${proposedQuantity}]`;
-                    aiReplyText = `Booking confirmed! ${forcedActionTag}`;
-                }
-            }
-        }
-    }
-    
-    // --------------------------------------------------------------------------
-    // ---------------------- CRITICAL FIX: BYPASS LLM ON CONFIRMATION ----------------------
-    // --------------------------------------------------------------------------
-    if (forcedActionTag && aiReplyText) {
-        // If we found a valid action, we execute it directly without hitting the LLM API.
-        
-        // --- ACTION PARSING & EXECUTION (Guaranteed correct logic) ---
-        const actionMatch = aiReplyText.match(/\[ACTION:BOOK\|(.*?)\|(.*?)\]/i);
-        const eventName = actionMatch[1].trim();
-        const quantity = parseInt(actionMatch[2], 10);
-
-        let eventToBook = events.find(e => eventName.toLowerCase() === e.name.toLowerCase());
-
-        let reply = aiReplyText.replace(/\[ACTION:BOOK\|.*?\|.*?\]/ig, '').trim(); 
-        
-        if (eventToBook && eventToBook.tickets_available >= quantity && quantity > 0) {
-            
-            const success = await purchaseTicket(eventToBook.id, eventToBook.name, quantity);
-            if (!success) {
-                 reply = `Booking partially failed. Only ${eventToBook.tickets_available} tickets were booked for the ${eventName}.`;
-            } else {
-                 // Success case
-                 reply = `Booking confirmed! You have successfully booked ${quantity} ticket(s) for the ${eventName}.`;
-            }
-        } else {
-            reply = `Sorry, I couldn't complete the booking. The event was not found, the quantity was invalid (${quantity}), or tickets sold out.`;
-            setStatus(`Booking aborted: Check availability or event name.`);
-        }
-        
-        setChatLog((prev) => [...prev, { sender: "ai", text: reply }]);
-        speak(reply);
-        return; // *** EXIT THE FUNCTION HERE - LLM API call is skipped ***
-    }
-    // --------------------------------------------------------------------------
-
-    // If not a confirmation, or if confirmation context failed, proceed to LLM.
-    messages.push({ role: "user", content: userText });
-    // --- End Message Construction ---
-
-
     try {
-      const res = await fetch(finalUrl, {
+      // Use backend chat service
+      const res = await fetch(`${API_ENDPOINTS.CHAT}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: messages, // Now guaranteed to be defined
+          message: userText,
+          context: {
+            events: events,
+            user: user
+          }
         }),
       });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        console.error("OpenAI API Error:", res.status, errData);
-        const errorMessage = errData?.error?.message || `API request failed with status: ${res.status}`;
-        const fail = `LLM Error: ${errorMessage}. The CORS proxy may be unstable, or the API key may be invalid/expired.`;
+        console.error("Chat Service Error:", res.status, errData);
+        const errorMessage = errData?.error || `Service request failed with status: ${res.status}`;
+        const fail = `Chat Error: ${errorMessage}. The chat service may be unavailable.`;
         setChatLog((prev) => [...prev, { sender: "ai", text: fail }]);
         speak(fail);
         return;
       }
 
       const data = await res.json();
-      let reply =
-        data?.choices?.[0]?.message?.content ||
-        "Sorry, I couldn't get a response.";
-
-      // --- ACTION PARSING LOGIC (Handles tag from LLM's own response) ---
-      const actionMatch = reply.match(/\[ACTION:BOOK\|(.*?)\|(.*?)\]/i);
-
-      if (actionMatch) {
-          // Remove the action tag from the reply
-          reply = reply.replace(/(\*\*?)\[ACTION:BOOK\|.*?\|.*?\](\*\*?)/ig, '').trim();
-          
-          const eventName = actionMatch[1].trim();
-          const quantity = parseInt(actionMatch[2], 10);
-
-          let eventToBook = events.find(e =>
-              eventName.toLowerCase() === e.name.toLowerCase() 
-          );
-
-          if (eventToBook && eventToBook.tickets_available >= quantity && quantity > 0) {
-              
-              const success = await purchaseTicket(eventToBook.id, eventToBook.name, quantity);
-
-              if (!success) {
-                   reply += ` (Internal App Note: Booking partially or fully failed).`;
-              }
-
-          } else {
-              reply += ` (Internal App Note: Booking failed—event not found, quantity invalid, or sold out: ${eventToBook ? eventToBook.tickets_available : 'N/A'}).`;
-              setStatus(`Booking aborted: Check availability or event name.`);
-          }
-      }
-      // --- END ACTION PARSING LOGIC ---
+      let reply = data?.response || "Sorry, I couldn't get a response.";
 
       setChatLog((prev) => [...prev, { sender: "ai", text: reply }]);
       speak(reply);
-    } catch (err) {
-      console.error(err);
-      const fail = "Error contacting the LLM.";
+      
+    } catch (error) {
+      console.error("Chat Service Error:", error);
+      const fail = `Network error: Could not connect to the chat service.`;
       setChatLog((prev) => [...prev, { sender: "ai", text: fail }]);
       speak(fail);
     }
