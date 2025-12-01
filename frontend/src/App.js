@@ -167,8 +167,6 @@ function App() {
   };
 
   // ---------- LLM CALL: sendToLLM (Use simple backend chat service) ----------
-  const [pendingBooking, setPendingBooking] = useState(null);
-  
   const sendToLLM = async (userText) => {
     const userMsg = { sender: "user", text: userText };
     setChatLog((prev) => [...prev, userMsg]);
