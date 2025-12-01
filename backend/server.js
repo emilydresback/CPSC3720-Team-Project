@@ -15,6 +15,21 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use('/api', routes);
 
+// Root route
+app.get('/', (req, res) => {
+    res.status(200).json({ 
+        message: 'TigerTix API Server',
+        status: 'running',
+        endpoints: {
+            health: '/health',
+            auth: '/api/auth/*',
+            events: '/api/events',
+            bookings: '/api/bookings',
+            admin: '/api/admin/*'
+        }
+    });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK', message: 'TigerTix Backend is running' });
