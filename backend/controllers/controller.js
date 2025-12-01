@@ -92,20 +92,53 @@ const handleChat = async (req, res) => {
       
       if (matchedEvent) {
         if (matchedEvent.tickets_available >= quantity) {
-          return res.json({
-            response: `Great! I found ${matchedEvent.name} on ${matchedEvent.date} with ${matchedEvent.tickets_available} tickets available. To book ${quantity} ticket(s), please click the "Book Now" button on the event card.`,
-            suggestions: ["Show me more events", "Help with booking"]
-          });
+          // Actually book the tickets
+          try {
+            let successfulBookings = 0;
+            
+            // Process each ticket booking
+            for (let i = 0; i < quantity; i++) {
+              const result = await updateTicketCount(matchedEvent.id);
+              if (result.success) {
+                successfulBookings++;
+              } else {
+                break; // Stop on first failure
+              }
+            }
+            
+            if (successfulBookings === quantity) {
+              return res.json({
+                response: `🎉 Success! I've booked ${quantity} ticket(s) for ${matchedEvent.name} on ${matchedEvent.date}. Your booking is confirmed!`,
+                suggestions: ["Book more tickets", "Show other events", "Help"]
+              });
+            } else if (successfulBookings > 0) {
+              return res.json({
+                response: `⚠️ Partially successful! I was able to book ${successfulBookings} out of ${quantity} tickets for ${matchedEvent.name}. Some tickets may have sold out during the booking process.`,
+                suggestions: ["Try booking more", "Show other events"]
+              });
+            } else {
+              return res.json({
+                response: `❌ Sorry, I couldn't book any tickets for ${matchedEvent.name}. The event may be sold out or there was a technical issue.`,
+                suggestions: ["Show other events", "Check availability"]
+              });
+            }
+          } catch (error) {
+            console.error('Booking error in chat:', error);
+            return res.json({
+              response: `❌ Sorry, there was an error processing your booking for ${matchedEvent.name}. Please try again or contact support.`,
+              suggestions: ["Try again", "Show other events", "Help"]
+            });
+          }
         } else {
           return res.json({
-            response: `Sorry, ${matchedEvent.name} only has ${matchedEvent.tickets_available} tickets available, but you requested ${quantity}. Would you like to book ${matchedEvent.tickets_available} tickets instead?`,
+            response: `Sorry, ${matchedEvent.name} only has ${matchedEvent.tickets_available} tickets available, but you requested ${quantity}. Would you like me to book ${matchedEvent.tickets_available} tickets instead?`,
             suggestions: [`Book ${matchedEvent.tickets_available} tickets for ${matchedEvent.name}`, "Show other events"]
           });
         }
       } else {
         return res.json({
           response: "I'd be happy to help you book tickets! Which event are you interested in? You can see all available events above.",
-          suggestions: events.slice(0, 2).map(event => `${event.name}`)
+          suggestions: events.slice(0, 2).map(event => `Book tickets for ${event.name}`)
         });
       }
     }

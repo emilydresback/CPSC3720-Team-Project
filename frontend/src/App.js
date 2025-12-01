@@ -202,6 +202,12 @@ function App() {
       setChatLog((prev) => [...prev, { sender: "ai", text: reply }]);
       speak(reply);
       
+      // Check if booking was successful and refresh events
+      if (reply.includes('🎉 Success!') || reply.includes('I\'ve booked') || reply.includes('booking is confirmed')) {
+        // Refresh events to show updated ticket counts
+        fetchEvents();
+      }
+      
     } catch (error) {
       console.error("Chat Service Error:", error);
       const fail = `Network error: Could not connect to the chat service.`;
