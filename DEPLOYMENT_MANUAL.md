@@ -19,17 +19,14 @@ Your TigerTix application is **ready for deployment**! All 79 tests are passing.
 # 1. Login to Railway
 railway login
 
-# 2. Initialize project
-railway init
+# 2. Initialize project (already done - you have project ID: 55e8874e-def1-4953-9174-1e48610f4651)
+# railway init
 
-# 3. Set environment variables
-railway variables set NODE_ENV=production
-railway variables set JWT_SECRET=your_secure_random_string_here
-railway variables set DATABASE_PATH=./backend/shared-db/database.sqlite
-railway variables set AUTH_PORT=7005
-railway variables set ADMIN_PORT=5001
-railway variables set CLIENT_PORT=6001
-railway variables set LLM_PORT=5003
+# 3. Set environment variables (use correct syntax)
+railway variables --set NODE_ENV=production
+railway variables --set JWT_SECRET=your_secure_random_string_here
+railway variables --set DATABASE_PATH=./backend/shared-db/database.sqlite
+railway variables --set CORS_ORIGIN=http://localhost:3000
 
 # 4. Deploy
 railway up

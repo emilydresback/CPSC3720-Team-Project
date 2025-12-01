@@ -97,14 +97,14 @@ deploy_backend() {
     # Link to project or create new one
     railway link || railway init
     
-    # Set environment variables using new CLI syntax
-    railway variables set NODE_ENV=production
-    railway variables set JWT_SECRET=$(openssl rand -base64 32 2>/dev/null || echo "fallback_jwt_secret_$(date +%s)")
-    railway variables set DATABASE_PATH=./backend/shared-db/database.sqlite
-    railway variables set AUTH_PORT=7005
-    railway variables set ADMIN_PORT=5001
-    railway variables set CLIENT_PORT=6001
-    railway variables set LLM_PORT=5003
+    # Set environment variables using correct CLI syntax
+    railway variables --set NODE_ENV=production
+    railway variables --set JWT_SECRET=$(openssl rand -base64 32 2>/dev/null || echo "fallback_jwt_secret_$(date +%s)")
+    railway variables --set DATABASE_PATH=./backend/shared-db/database.sqlite
+    railway variables --set AUTH_PORT=7005
+    railway variables --set ADMIN_PORT=5001
+    railway variables --set CLIENT_PORT=6001
+    railway variables --set LLM_PORT=5003
     
     # Deploy
     railway up --detach
@@ -141,8 +141,8 @@ deploy_frontend() {
     
     # Update backend CORS configuration
     if command -v railway &> /dev/null; then
-        railway variables set CORS_ORIGIN=$FRONTEND_URL
-        railway variables set ALLOWED_ORIGINS="$FRONTEND_URL,http://localhost:3000"
+        railway variables --set CORS_ORIGIN=$FRONTEND_URL
+        railway variables --set ALLOWED_ORIGINS="$FRONTEND_URL,http://localhost:3000"
     fi
 }
 
