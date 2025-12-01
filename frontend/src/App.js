@@ -11,6 +11,7 @@ function App() {
   const [chatLog, setChatLog] = useState([]); // {sender:'user'|'ai', text:string}
   const [listening, setListening] = useState(false);
   const [ttsOn, setTtsOn] = useState(true);
+  const [pendingBooking, setPendingBooking] = useState(null);
 
   // Browser Speech APIs
   const SpeechRecognition =
@@ -166,6 +167,8 @@ function App() {
   };
 
   // ---------- LLM CALL: sendToLLM (Use simple backend chat service) ----------
+  const [pendingBooking, setPendingBooking] = useState(null);
+  
   const sendToLLM = async (userText) => {
     const userMsg = { sender: "user", text: userText };
     setChatLog((prev) => [...prev, userMsg]);
@@ -181,7 +184,8 @@ function App() {
           message: userText,
           context: {
             events: events,
-            user: user
+            user: user,
+            pendingBooking: pendingBooking
           }
         }),
       });
@@ -202,8 +206,16 @@ function App() {
       setChatLog((prev) => [...prev, { sender: "ai", text: reply }]);
       speak(reply);
       
+      // Handle pending booking context
+      if (data.pendingBooking) {
+        setPendingBooking(data.pendingBooking);
+      } else if (userText.toLowerCase().match(/^(yes|y|confirm|ok|no|n|cancel|nevermind)$/)) {
+        // Clear pending booking after confirmation or cancellation
+        setPendingBooking(null);
+      }
+      
       // Check if booking was successful and refresh events
-      if (reply.includes('🎉 Success!') || reply.includes('I\'ve booked') || reply.includes('booking is confirmed')) {
+      if (reply.includes('Booking confirmed!') || reply.includes('successfully reserved') || data.confirmationNumber) {
         // Refresh events to show updated ticket counts
         fetchEvents();
       }

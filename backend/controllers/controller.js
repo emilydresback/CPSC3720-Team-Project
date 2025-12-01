@@ -92,43 +92,17 @@ const handleChat = async (req, res) => {
       
       if (matchedEvent) {
         if (matchedEvent.tickets_available >= quantity) {
-          // Actually book the tickets
-          try {
-            let successfulBookings = 0;
-            
-            // Process each ticket booking
-            for (let i = 0; i < quantity; i++) {
-              const result = await updateTicketCount(matchedEvent.id);
-              if (result.success) {
-                successfulBookings++;
-              } else {
-                break; // Stop on first failure
-              }
+          // Ask for confirmation instead of booking immediately
+          return res.json({
+            response: `I found ${matchedEvent.name} on ${matchedEvent.date} with ${matchedEvent.tickets_available} tickets available. Would you like me to book ${quantity} ticket(s) for this event? Please reply with "yes" to confirm or "no" to cancel.`,
+            suggestions: ["yes", "no", "Show other events"],
+            pendingBooking: {
+              eventId: matchedEvent.id,
+              eventName: matchedEvent.name,
+              quantity: quantity,
+              date: matchedEvent.date
             }
-            
-            if (successfulBookings === quantity) {
-              return res.json({
-                response: `🎉 Success! I've booked ${quantity} ticket(s) for ${matchedEvent.name} on ${matchedEvent.date}. Your booking is confirmed!`,
-                suggestions: ["Book more tickets", "Show other events", "Help"]
-              });
-            } else if (successfulBookings > 0) {
-              return res.json({
-                response: `⚠️ Partially successful! I was able to book ${successfulBookings} out of ${quantity} tickets for ${matchedEvent.name}. Some tickets may have sold out during the booking process.`,
-                suggestions: ["Try booking more", "Show other events"]
-              });
-            } else {
-              return res.json({
-                response: `❌ Sorry, I couldn't book any tickets for ${matchedEvent.name}. The event may be sold out or there was a technical issue.`,
-                suggestions: ["Show other events", "Check availability"]
-              });
-            }
-          } catch (error) {
-            console.error('Booking error in chat:', error);
-            return res.json({
-              response: `❌ Sorry, there was an error processing your booking for ${matchedEvent.name}. Please try again or contact support.`,
-              suggestions: ["Try again", "Show other events", "Help"]
-            });
-          }
+          });
         } else {
           return res.json({
             response: `Sorry, ${matchedEvent.name} only has ${matchedEvent.tickets_available} tickets available, but you requested ${quantity}. Would you like me to book ${matchedEvent.tickets_available} tickets instead?`,
@@ -141,6 +115,72 @@ const handleChat = async (req, res) => {
           suggestions: events.slice(0, 2).map(event => `Book tickets for ${event.name}`)
         });
       }
+    }
+
+    // Handle confirmation responses
+    if (lowerMessage.match(/^(yes|y|confirm|ok)$/)) {
+      const { pendingBooking } = context || {};
+      
+      if (pendingBooking) {
+        const { eventId, eventName, quantity } = pendingBooking;
+        
+        try {
+          let successfulBookings = 0;
+          
+          // Process each ticket booking
+          for (let i = 0; i < quantity; i++) {
+            const result = await updateTicketCount(eventId);
+            if (result.success) {
+              successfulBookings++;
+            } else {
+              break; // Stop on first failure
+            }
+          }
+          
+          if (successfulBookings === quantity) {
+            // Generate confirmation number
+            const confirmationNumber = `TT${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 100).toString().padStart(2, '0')}`;
+            
+            return res.json({
+              response: `Booking confirmed! I have successfully reserved ${quantity} ticket(s) for ${eventName}. Your confirmation number is: ${confirmationNumber}. Please save this number for your records.`,
+              suggestions: ["Book more tickets", "Show other events", "Help"],
+              confirmationNumber: confirmationNumber
+            });
+          } else if (successfulBookings > 0) {
+            const confirmationNumber = `TT${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 100).toString().padStart(2, '0')}`;
+            
+            return res.json({
+              response: `Partial booking completed. I was able to book ${successfulBookings} out of ${quantity} tickets for ${eventName}. Confirmation number: ${confirmationNumber}`,
+              suggestions: ["Try booking more", "Show other events"],
+              confirmationNumber: confirmationNumber
+            });
+          } else {
+            return res.json({
+              response: `Sorry, I couldn't complete your booking for ${eventName}. The tickets may have been sold out during the booking process.`,
+              suggestions: ["Show other events", "Check availability"]
+            });
+          }
+        } catch (error) {
+          console.error('Booking error in chat:', error);
+          return res.json({
+            response: `Sorry, there was an error processing your booking for ${eventName}. Please try again or contact support.`,
+            suggestions: ["Try again", "Show other events", "Help"]
+          });
+        }
+      } else {
+        return res.json({
+          response: "I don't have any pending booking to confirm. Please tell me which event you'd like to book tickets for.",
+          suggestions: ["Show me events", "Help with booking"]
+        });
+      }
+    }
+
+    // Handle cancellation responses
+    if (lowerMessage.match(/^(no|n|cancel|nevermind)$/)) {
+      return res.json({
+        response: "No problem! Your booking request has been cancelled. Is there anything else I can help you with?",
+        suggestions: ["Show me events", "Book different tickets", "Help"]
+      });
     }
     
     // Default response
