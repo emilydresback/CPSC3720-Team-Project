@@ -3,7 +3,7 @@
 ## Deployment Status: ✅ LIVE AND FULLY FUNCTIONAL
 
 ### Live URLs
-- **Frontend**: https://frontend-p5hwj4moe-annas-projects-51838d83.vercel.app
+- **Frontend**: https://frontend-gt4dh08wk-annas-projects-51838d83.vercel.app
 - **Backend API**: https://tigertix-production.up.railway.app/api
 
 ### Services Status
@@ -12,8 +12,8 @@
 - ✅ Database: SQLite with sample events automatically initialized
 - ✅ CORS: Configured for production cross-origin requests
 - ✅ Authentication: Ready for user registration/login
-- ✅ Chat Assistant: Simple rule-based chat service working
-- ✅ Ticket Booking: End-to-end booking functionality confirmed
+- ✅ Chat Assistant: Confirmation-based booking system working
+- ✅ Ticket Booking: Two-step confirmation with booking numbers
 
 ### Available Features
 1. **Event Browsing**: 5 sample events with ticket availability
@@ -27,11 +27,12 @@
 
 3. **Ticket Booking**: Fully functional booking with real-time updates
 
-4. **Chat Assistant**: Interactive chat helper that can:
-   - Greet users and provide guidance
-   - Show available events
-   - Help with booking information
-   - Answer basic questions about events
+4. **AI Chat Assistant**: Two-step confirmation booking system that:
+   - Understands booking requests and event names
+   - Asks for yes/no confirmation before booking
+   - Provides unique confirmation numbers (format: TTxxxxxxxx)
+   - Handles booking cancellations gracefully
+   - Updates event availability in real-time
 
 ### API Endpoints
 - `GET /api/events` - List all events ✅
