@@ -117,6 +117,11 @@ The setup is as follows:
     CORS_ALLOW_ORIGIN=http://localhost:3000
 
 ## How to Run Regression Tests
+Full Test Suite:
+    1. Navigate to the project root directory.
+    2. Run npm run test:all to execute all 138 automated tests.
+    3. Individual service tests: npm run test:admin, npm run test:client, npm run test:auth, npm run test:frontend.
+    4. Integration tests: npm run test:integration, npm run test:e2e, npm run test:database.
 
 
 ## Team Members, Instructor, TAs, and Roles
