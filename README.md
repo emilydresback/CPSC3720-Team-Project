@@ -1,5 +1,5 @@
 ## Demo Video
-Watch our demo sprint 4: [[[https://youtu.be/CdKDy1FO9GU](url)]](https://youtu.be/gGBjCrMPdEQ)
+Watch our demo sprint 4: [[[https://youtu.be/gGBjCrMPdEQ](url)]]
 
 ## Github
 We are submitting the branch: Sprint2v2
